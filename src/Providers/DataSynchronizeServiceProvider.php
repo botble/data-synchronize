@@ -17,4 +17,9 @@ class DataSynchronizeServiceProvider extends ServiceProvider
             ->loadRoutes()
             ->loadAndPublishViews();
     }
+
+    protected function getPath(string|null $path = null): string
+    {
+        return __DIR__ . '/../..' . ($path ? '/' . ltrim($path, '/') : '');
+    }
 }
