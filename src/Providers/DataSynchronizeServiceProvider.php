@@ -15,7 +15,8 @@ class DataSynchronizeServiceProvider extends ServiceProvider
             ->setNamespace('packages/data-synchronize')
             ->loadAndPublishTranslations()
             ->loadRoutes()
-            ->loadAndPublishViews();
+            ->loadAndPublishViews()
+            ->publishAssets();
     }
 
     protected function getPath(string|null $path = null): string
