@@ -1,0 +1,31 @@
+.data-synchronize {
+    &-import-preview-template {
+        button[data-dz-remove] {
+            all: unset;
+            cursor: pointer;
+
+            svg {
+                cursor: pointer;
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+    }
+
+    &-import-output {
+        p {
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    &-quick-export-button {
+        all: unset;
+        font-weight: 500;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

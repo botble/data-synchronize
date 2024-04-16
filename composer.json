@@ -1,0 +1,21 @@
+{
+    "name": "botble/data-synchronize",
+    "description": "Make site ready in few steps",
+    "type": "botble-package",
+    "autoload": {
+        "psr-4": {
+            "Botble\\DataSynchronize\\": "src/"
+        }
+    },
+    "require": {
+        "botble/platform": "*@dev",
+        "maatwebsite/excel": "^3.1"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Botble\\DataSynchronize\\Providers\\DataSynchronizeServiceProvider"
+            ]
+        }
+    }
+}
