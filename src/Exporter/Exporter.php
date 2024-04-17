@@ -4,7 +4,6 @@ namespace Botble\DataSynchronize\Exporter;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\DataSynchronize\Enums\ExportColumnType;
 use Illuminate\Contracts\View\View;
@@ -57,7 +56,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function headings(): array
     {
-        return array_map(fn (ExportColumn $column) => $column->getLabel(), $this->getAcceptedColumns());
+        return array_map(fn(ExportColumn $column) => $column->getLabel(), $this->getAcceptedColumns());
     }
 
     public function map($row): array
@@ -155,8 +154,6 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function render(): View
     {
-        PageTitle::setTitle($this->getHeading());
-
         Assets::addScriptsDirectly('vendor/core/packages/data-synchronize/js/data-synchronize.js');
 
         return view('packages/data-synchronize::export', [
@@ -205,12 +202,12 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     public function getAcceptedColumns(): array
     {
         $columns = $this->columns();
-        $requiredColumns = array_filter($this->columns(), fn (ExportColumn $column) => $column->isDisabled());
+        $requiredColumns = array_filter($this->columns(), fn(ExportColumn $column) => $column->isDisabled());
 
         if ($this->acceptedColumns) {
             return [
                 ...$requiredColumns,
-                ...array_filter($columns, fn (ExportColumn $column) => in_array($column->getName(), $this->acceptedColumns)),
+                ...array_filter($columns, fn(ExportColumn $column) => in_array($column->getName(), $this->acceptedColumns)),
             ];
         }
 
