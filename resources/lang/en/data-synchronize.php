@@ -29,6 +29,7 @@ return [
         ],
 
         'uploading_message' => 'Starting to upload file...',
+        'uploaded_message' => 'File :file has been uploaded successfully. Start validating data...',
         'validating_message' => 'Validating from :from to :to...',
         'importing_message' => 'Importing from :from to :to...',
         'done_message' => 'Imported :count :label successfully.',

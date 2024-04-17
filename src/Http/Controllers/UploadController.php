@@ -61,7 +61,9 @@ class UploadController extends BaseController
 
         return $this
             ->httpResponse()
-            ->setMessage(sprintf('File %s has been uploaded successfully. Start validating data...', $fileUpload->getClientOriginalName()))
+            ->setMessage(trans('packages/data-synchronize::data-synchronize.import.uploaded_message', [
+                'file' => $fileUpload->getClientOriginalName(),
+            ]))
             ->setData([
                 'file_name' => $fileName,
             ]);
