@@ -104,7 +104,9 @@ $(() => {
                         total = data.data.total
                     }
 
-                    output(data.message)
+                    if (data.message) {
+                        output(data.message)
+                    }
 
                     if (data.data.count > 0) {
                         validate(data.data.file_name, data.data.offset + limit, limit)

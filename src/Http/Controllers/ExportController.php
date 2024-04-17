@@ -13,6 +13,11 @@ abstract class ExportController extends BaseController
 {
     abstract protected function getExporter(): Exporter;
 
+    protected function allowsSelectColumns(): bool
+    {
+        return true;
+    }
+
     protected function breadcrumb(): Breadcrumb
     {
         return parent::breadcrumb()
@@ -37,10 +42,15 @@ abstract class ExportController extends BaseController
         }
 
         try {
-            return $this
+            $exporter = $this
                 ->getExporter()
-                ->format($request->input('format'))
-                ->export();
+                ->format($request->input('format'));
+
+            if ($this->allowsSelectColumns()) {
+                $exporter->acceptedColumns($request->input('columns'));
+            }
+
+            return $exporter->export();
         } catch (Throwable $e) {
             BaseHelper::logError($e);
 

@@ -3,6 +3,8 @@
 namespace Botble\DataSynchronize\Importer;
 
 use Botble\Base\Facades\Assets;
+use Botble\DataSynchronize\DataTransferObjects\ChunkImportResponse;
+use Botble\DataSynchronize\DataTransferObjects\ChunkValidateResponse;
 use Botble\DataSynchronize\Exporter\ExportColumn;
 use Botble\DataSynchronize\Exporter\Exporter;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -22,7 +24,7 @@ abstract class Importer
 
     abstract public function getImportUrl(): string;
 
-    abstract public function array(array $data): int;
+    abstract public function handle(array $data): int;
 
     public function getLabel(): string
     {
@@ -107,7 +109,7 @@ abstract class Importer
         );
     }
 
-    public function validate(string $fileName, int $offset = 0, int $limit = 100): array
+    public function validate(string $fileName, int $offset = 0, int $limit = 100): ChunkValidateResponse
     {
         $rows = $this->transformRows($this->getRowsByOffset($fileName, $offset, $limit));
 
@@ -121,64 +123,40 @@ abstract class Importer
             $errors = array_map(fn ($error) => $error[0], $validator->errors()->toArray());
         }
 
-        $rowsCount = count($rows);
+        $count = count($rows);
 
-        if ($rowsCount === 0) {
+        if ($count === 0) {
             $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '-' . uniqid() . '.' . pathinfo($fileName, PATHINFO_EXTENSION);
 
             $this->filesystem()->move("uploads/{$fileName}", "uploads/{$newFileName}");
         }
 
-        $from = $offset + 1;
-        $to = $offset + $rowsCount;
-
-        return [
-            'total' => $total,
-            'offset' => $offset,
-            'count' => $rowsCount,
-            'errors' => array_values($errors),
-            'file_name' => $rowsCount === 0 ? $newFileName : $fileName,
-            'message' => $from <= $to ? trans('packages/data-synchronize::data-synchronize.import.validating_message', [
-                'from' => number_format($from),
-                'to' => number_format($to),
-            ]) : null,
-        ];
+        return new ChunkValidateResponse(
+            offset: $offset,
+            count: $count,
+            total: $total,
+            fileName: $count === 0 ? $newFileName : $fileName,
+            errors: array_values($errors),
+        );
     }
 
-    public function import(string $fileName, int $offset = 0, int $limit = 100): array
+    public function import(string $fileName, int $offset = 0, int $limit = 100): ChunkImportResponse
     {
         $rows = $this->getRowsByOffset($fileName, $offset, $limit);
 
-        $rowsCount = count($rows);
-        $from = $offset + 1;
-        $to = $offset + $rowsCount;
+        $count = count($rows);
 
-        $imported = $this->array($this->transformRows($rows));
+        $imported = $this->handle($this->transformRows($rows));
 
-        $total = request()->integer('total') + $imported;
-
-        if ($from <= $to) {
-            $message = $this->getImportingMessage($from, $to);
-        } else {
-            if ($total > 0) {
-                $message = $this->getDoneMessage($total);
-            } else {
-                $message = trans('packages/data-synchronize::data-synchronize.import.no_data_message', [
-                    'label' => $this->getLabel(),
-                ]);
-            }
+        if ($count === 0) {
+            $this->filesystem()->delete("uploads/$fileName");
         }
 
-        if (count($rows) === 0) {
-            $this->filesystem()->delete("uploads/{$fileName}");
-        }
-
-        return [
-            'offset' => $offset,
-            'count' => $rowsCount,
-            'message' => $message,
-            'total' => $total,
-        ];
+        return new ChunkImportResponse(
+            offset: $offset,
+            count: $count,
+            imported: $imported,
+        );
     }
 
     public function getImportingMessage(int $from, int $to): string
@@ -263,7 +241,8 @@ abstract class Importer
         $columns = $this->getColumns();
         $label = $this->getLabel();
 
-        $exporter = new class ($examples, $columns, $label) extends Exporter {
+        $exporter = new class($examples, $columns, $label) extends Exporter
+        {
             public function __construct(protected array $examples, protected array $columns, protected string $label)
             {
             }

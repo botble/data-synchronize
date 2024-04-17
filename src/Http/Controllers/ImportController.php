@@ -32,16 +32,33 @@ abstract class ImportController extends BaseController
     public function validateData(ImportRequest $request)
     {
         try {
-            $result = $this->getImporter()->validate(
+            $response = $this->getImporter()->validate(
                 $request->input('file_name'),
                 $request->input('offset'),
                 $request->input('limit'),
             );
 
-            return $this
-                ->httpResponse()
-                ->setMessage(Arr::pull($result, 'message'))
-                ->setData($result);
+            $message = $response->getFromOffset() <= $response->getNextOffset() ? trans('packages/data-synchronize::data-synchronize.import.validating_message', [
+                'from' => number_format($response->getFromOffset()),
+                'to' => number_format($response->getNextOffset()),
+            ]) : null;
+
+            $dataToResponse = [
+                'total' => $response->total,
+                'offset' => $response->offset,
+                'count' => $response->count,
+                'file_name' => $response->fileName,
+                'errors' => $response->errors,
+            ];
+
+            $httpResponse = $this->httpResponse();
+
+            if ($message) {
+                $httpResponse->setMessage($message);
+            }
+
+            return $httpResponse
+                ->setData($dataToResponse);
         } catch (Exception $e) {
             return $this
                 ->httpResponse()
@@ -60,16 +77,37 @@ abstract class ImportController extends BaseController
         }
 
         try {
-            $result = $this->getImporter()->import(
+            $response = $this->getImporter()->import(
                 $request->input('file_name'),
                 $request->input('offset'),
                 $request->input('limit'),
             );
 
+            $from = $response->getFromOffset();
+            $to = $response->getNextOffset();
+
+            $total = $request->integer('total') + $response->imported;
+
+            if ($from <= $to) {
+                $message = $this->getImporter()->getImportingMessage($from, $to);
+            } else {
+                if ($total > 0) {
+                    $message = $this->getImporter()->getDoneMessage($total);
+                } else {
+                    $message = trans('packages/data-synchronize::data-synchronize.import.no_data_message', [
+                        'label' => $this->getImporter()->getLabel(),
+                    ]);
+                }
+            }
+
             return $this
                 ->httpResponse()
-                ->setMessage(Arr::pull($result, 'message'))
-                ->setData($result);
+                ->setMessage($message)
+                ->setData([
+                    'offset' => $response->offset,
+                    'count' => $response->count,
+                    'total' => $total,
+                ]);
         } catch (Exception $e) {
             return $this
                 ->httpResponse()
