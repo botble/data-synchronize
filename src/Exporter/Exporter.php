@@ -161,32 +161,23 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
         ]);
     }
 
-    public function export(): BinaryFileResponse|BaseHttpResponse
+    public function export(): BinaryFileResponse
     {
-        try {
-            BaseHelper::maximumExecutionTimeAndMemoryLimit();
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-            $writeType = match ($this->format) {
-                'csv' => Excel::CSV,
-                'xlsx' => Excel::XLSX,
-            };
+        $writeType = match ($this->format) {
+            'csv' => Excel::CSV,
+            'xlsx' => Excel::XLSX,
+        };
 
-            $headers = [
-                'Content-Type' => match ($this->format) {
-                    'csv' => 'text/csv',
-                    'xlsx' => 'text/xlsx',
-                },
-            ];
+        $headers = [
+            'Content-Type' => match ($this->format) {
+                'csv' => 'text/csv',
+                'xlsx' => 'text/xlsx',
+            },
+        ];
 
-            return ExcelFacade::download($this, "{$this->getExportFileName()}.{$this->format}", $writeType, $headers);
-        } catch (Throwable $e) {
-            BaseHelper::logError($e);
-
-            return BaseHttpResponse::make()
-                ->setError()
-                ->setCode(400)
-                ->setMessage($e->getMessage());
-        }
+        return ExcelFacade::download($this, "{$this->getExportFileName()}.{$this->format}", $writeType, $headers);
     }
 
     public function acceptedColumns(?array $columns): self
