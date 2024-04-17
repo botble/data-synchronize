@@ -56,7 +56,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function headings(): array
     {
-        return array_map(fn(ExportColumn $column) => $column->getLabel(), $this->getAcceptedColumns());
+        return array_map(fn (ExportColumn $column) => $column->getLabel(), $this->getAcceptedColumns());
     }
 
     public function map($row): array
@@ -202,12 +202,12 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     public function getAcceptedColumns(): array
     {
         $columns = $this->columns();
-        $requiredColumns = array_filter($this->columns(), fn(ExportColumn $column) => $column->isDisabled());
+        $requiredColumns = array_filter($this->columns(), fn (ExportColumn $column) => $column->isDisabled());
 
         if ($this->acceptedColumns) {
             return [
                 ...$requiredColumns,
-                ...array_filter($columns, fn(ExportColumn $column) => in_array($column->getName(), $this->acceptedColumns)),
+                ...array_filter($columns, fn (ExportColumn $column) => in_array($column->getName(), $this->acceptedColumns)),
             ];
         }
 

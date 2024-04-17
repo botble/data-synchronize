@@ -108,7 +108,7 @@ abstract class Importer
         $errors = [];
 
         if ($validator->fails()) {
-            $errors = array_map(fn($error) => $error[0], $validator->errors()->toArray());
+            $errors = array_map(fn ($error) => $error[0], $validator->errors()->toArray());
         }
 
         $rowsCount = count($rows);
@@ -216,7 +216,7 @@ abstract class Importer
 
     public function transformRows(array $rows): array
     {
-        return array_map(fn($row) => collect($this->getColumns())
+        return array_map(fn ($row) => collect($this->getColumns())
             ->mapWithKeys(function (ImportColumn $column) use ($row) {
                 $value = $row[$column->getName()] ?? null;
 
@@ -236,7 +236,7 @@ abstract class Importer
     public function getValidationRules(): array
     {
         $rules = collect($this->getColumns())
-            ->mapWithKeys(fn(ImportColumn $column) => ["*.{$column->getName()}" => $column->getRules()])
+            ->mapWithKeys(fn (ImportColumn $column) => ["*.{$column->getName()}" => $column->getRules()])
             ->all();
 
         return apply_filters('data_synchronize_importer_validation_rules', $rules);
@@ -254,11 +254,13 @@ abstract class Importer
         $label = $this->getLabel();
 
         $exporter = new class ($examples, $columns, $label) extends Exporter {
-            public function __construct(protected array $examples, protected array $columns, protected string $label) {}
+            public function __construct(protected array $examples, protected array $columns, protected string $label)
+            {
+            }
 
             public function columns(): array
             {
-                return array_map(fn(ImportColumn $item) => ExportColumn::make($item->getName())->label($item->getLabel()), $this->columns);
+                return array_map(fn (ImportColumn $item) => ExportColumn::make($item->getName())->label($item->getLabel()), $this->columns);
             }
 
             public function getExportFileName(): string
@@ -268,13 +270,13 @@ abstract class Importer
 
             public function collection(): Collection
             {
-                return collect($this->examples)->map(fn($item) => (object) $item);
+                return collect($this->examples)->map(fn ($item) => (object) $item);
             }
         };
 
         return $exporter
             ->format($format)
-            ->acceptedColumns(array_map(fn(ImportColumn $column) => $column->getName(), $columns))
+            ->acceptedColumns(array_map(fn (ImportColumn $column) => $column->getName(), $columns))
             ->export();
     }
 }
