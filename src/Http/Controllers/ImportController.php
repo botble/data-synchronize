@@ -3,6 +3,7 @@
 namespace Botble\DataSynchronize\Http\Controllers;
 
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\Base\Supports\Breadcrumb;
 use Botble\DataSynchronize\Http\Requests\DownloadTemplateRequest;
 use Botble\DataSynchronize\Http\Requests\ImportRequest;
 use Botble\DataSynchronize\Importer\Importer;
@@ -13,8 +14,17 @@ abstract class ImportController extends BaseController
 {
     abstract protected function getImporter(): Importer;
 
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
+            ->add(trans('core/base::layouts.tools'))
+            ->add(trans('packages/data-synchronize::data-synchronize.tools.export_import_data'), route('data-synchronize.tools.data-synchronize'));
+    }
+
     public function index()
     {
+        $this->pageTitle($this->getImporter()->getHeading());
+
         return $this->getImporter()->render();
     }
 

@@ -100,7 +100,6 @@
     <x-core::custom-template id="data-synchronize-import-preview-template">
         <div class="position-relative d-flex gap-2 data-synchronize-import-preview-template">
             <x-core::icon name="ti ti-file" style="height: 2rem; width: 2rem" />
-
             <div>
                 <h4><span data-dz-name></span></h4>
                 <div class="d-flex align-items-center small text-muted">

@@ -3,7 +3,6 @@
 namespace Botble\DataSynchronize\Importer;
 
 use Botble\Base\Facades\Assets;
-use Botble\Base\Facades\PageTitle;
 use Botble\DataSynchronize\Exporter\ExportColumn;
 use Botble\DataSynchronize\Exporter\Exporter;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
@@ -87,8 +86,6 @@ abstract class Importer
 
     public function render(): View
     {
-        PageTitle::setTitle($this->getHeading());
-
         Assets::addStylesDirectly('vendor/core/packages/data-synchronize/css/data-synchronize.css')
             ->addScriptsDirectly('vendor/core/packages/data-synchronize/js/data-synchronize.js')
             ->addScripts('dropzone')

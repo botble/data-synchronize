@@ -4,7 +4,6 @@ namespace Botble\DataSynchronize\Exporter;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
-use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\DataSynchronize\Enums\ExportColumnType;
 use Illuminate\Contracts\View\View;
@@ -155,8 +154,6 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function render(): View
     {
-        PageTitle::setTitle($this->getHeading());
-
         Assets::addScriptsDirectly('vendor/core/packages/data-synchronize/js/data-synchronize.js');
 
         return view('packages/data-synchronize::export', [

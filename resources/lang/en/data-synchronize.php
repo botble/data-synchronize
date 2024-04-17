@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'tools' => [
+        'export_import_data' => 'Export/Import Data',
+    ],
+
     'import' => [
         'name' => 'Import',
         'heading' => 'Import :label',
