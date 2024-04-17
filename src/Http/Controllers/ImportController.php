@@ -2,6 +2,7 @@
 
 namespace Botble\DataSynchronize\Http\Controllers;
 
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\DataSynchronize\Http\Requests\DownloadTemplateRequest;
@@ -51,6 +52,13 @@ abstract class ImportController extends BaseController
 
     public function import(ImportRequest $request)
     {
+        if (BaseHelper::hasDemoModeEnabled()) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(trans('core/base::system.disabled_in_demo_mode'));
+        }
+
         try {
             $result = $this->getImporter()->import(
                 $request->input('file_name'),
@@ -72,6 +80,13 @@ abstract class ImportController extends BaseController
 
     public function downloadExample(DownloadTemplateRequest $request)
     {
+        if (BaseHelper::hasDemoModeEnabled()) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(trans('core/base::system.disabled_in_demo_mode'));
+        }
+
         return $this->getImporter()->downloadExample($request->input('format'));
     }
 }
