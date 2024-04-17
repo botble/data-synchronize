@@ -33,6 +33,7 @@ abstract class Importer
             ->snake()
             ->replace('_', ' ')
             ->remove('importer')
+            ->trim()
             ->title();
     }
 

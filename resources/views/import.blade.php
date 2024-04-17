@@ -7,6 +7,8 @@
         $acceptedFiles = Arr::join(array_map(fn ($item) => ".$item", $importer->getAcceptedFiles()), ',');
     @endphp
 
+    {!! apply_filters('data_synchronize_import_page_before', null, $importer) !!}
+
     <x-core::form
         method="post"
         :url="route('data-synchronize.upload')"
@@ -79,6 +81,8 @@
         </x-core::alert>
     </x-core::form>
 
+    {!! apply_filters('data_synchronize_import_page_after', null, $importer) !!}
+
     @if($importer->getExportUrl())
         <x-core::form
             method="POST"
@@ -112,4 +116,6 @@
             </div>
         </div>
     </x-core::custom-template>
+
+    {!! apply_filters('data_synchronize_import_page_footer', null, $importer) !!}
 @endpush
