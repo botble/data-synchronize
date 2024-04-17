@@ -13,7 +13,7 @@ abstract class ExportController extends BaseController
 {
     abstract protected function getExporter(): Exporter;
 
-    protected function allowMappingColumns(): bool
+    protected function allowsSelectColumns(): bool
     {
         return true;
     }
@@ -46,7 +46,7 @@ abstract class ExportController extends BaseController
                 ->getExporter()
                 ->format($request->input('format'));
 
-            if ($this->allowMappingColumns()) {
+            if ($this->allowsSelectColumns()) {
                 $exporter->acceptedColumns($request->input('columns'));
             }
 
