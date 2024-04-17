@@ -19,6 +19,7 @@ class DataSynchronizeServiceProvider extends ServiceProvider
             ->setNamespace('packages/data-synchronize')
             ->loadAndPublishTranslations()
             ->loadRoutes()
+            ->loadAndPublishConfigurations(['data-synchronize'])
             ->loadAndPublishViews()
             ->publishAssets()
             ->registerPanelSection()

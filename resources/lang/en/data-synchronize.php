@@ -14,7 +14,7 @@ return [
             'quick_export_message' => 'If you want to export :label data, you can do it quickly by clicking on :export_csv_link or :export_excel_link.',
             'quick_export_button' => 'Export to :format',
             'dropzone_message' => 'Drag and drop file here or click to upload',
-            'mime_types_allowed' => 'Choose a file with the following mime types: :types.',
+            'allowed_extensions' => 'Choose a file with following extensions: :extensions.',
             'import_button' => 'Import',
         ],
 
