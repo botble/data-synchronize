@@ -10,12 +10,12 @@ class ChunkResponse
     ) {
     }
 
-    public function getFrom(): int
+    public function getFromOffset(): int
     {
         return $this->offset + 1;
     }
 
-    public function getTo(): int
+    public function getNextOffset(): int
     {
         return $this->offset + $this->count;
     }

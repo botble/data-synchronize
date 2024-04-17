@@ -38,9 +38,9 @@ abstract class ImportController extends BaseController
                 $request->input('limit'),
             );
 
-            $message = $response->getFrom() <= $response->getTo() ? trans('packages/data-synchronize::data-synchronize.import.validating_message', [
-                'from' => number_format($response->getFrom()),
-                'to' => number_format($response->getTo()),
+            $message = $response->getFromOffset() <= $response->getNextOffset() ? trans('packages/data-synchronize::data-synchronize.import.validating_message', [
+                'from' => number_format($response->getFromOffset()),
+                'to' => number_format($response->getNextOffset()),
             ]) : null;
 
             $dataToResponse = [
@@ -83,8 +83,8 @@ abstract class ImportController extends BaseController
                 $request->input('limit'),
             );
 
-            $from = $response->getFrom();
-            $to = $response->getTo();
+            $from = $response->getFromOffset();
+            $to = $response->getNextOffset();
 
             $total = $request->integer('total') + $response->imported;
 
