@@ -16,8 +16,6 @@ use Spatie\SimpleExcel\SimpleExcelReader;
 
 abstract class Importer
 {
-    protected array $acceptedFiles = ['csv', 'xls', 'xlsx'];
-
     abstract public function columns(): array;
 
     abstract public function getValidateUrl(): string;
@@ -59,7 +57,18 @@ abstract class Importer
 
     public function getAcceptedFiles(): array
     {
-        return apply_filters('data_synchronize_importer_accepted_files', $this->acceptedFiles);
+        return apply_filters(
+            'data_synchronize_importer_accepted_files',
+            config('packages.data-synchronize.data-synchronize.mime_types')
+        );
+    }
+
+    public function getFileExtensions(): array
+    {
+        return apply_filters(
+            'data_synchronize_importer_file_extensions',
+            config('packages.data-synchronize.data-synchronize.extensions')
+        );
     }
 
     public function chunkSize(): int

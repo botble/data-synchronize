@@ -9,8 +9,8 @@ use Botble\Media\Chunks\Handler\DropZoneUploadHandler;
 use Botble\Media\Chunks\Receiver\FileReceiver;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class UploadController extends BaseController
 {
@@ -41,25 +41,29 @@ class UploadController extends BaseController
             ]);
     }
 
-    protected function saveFile(UploadedFile $file): BaseHttpResponse
+    protected function saveFile(UploadedFile $fileUpload): BaseHttpResponse
     {
-        $fileName = $this->createFilename($file);
-        $destination = Storage::disk('local')->path('uploads');
+        $validator = Validator::make(['file' => $fileUpload], [
+            'file' => ['required', 'mimetypes:' . implode(',', config('packages.data-synchronize.data-synchronize.mime_types'))],
+        ]);
 
-        $file->move($destination, $fileName);
-
-        if (! in_array($file->getClientOriginalExtension(), ['csv', 'xlsx'])) {
-            File::delete("$destination/$fileName");
-
+        if ($validator->fails()) {
             return $this
                 ->httpResponse()
                 ->setError()
-                ->setMessage('File type is not supported.');
+                ->setMessage($validator->errors()->first());
         }
+
+        $fileName = $this->createFilename($fileUpload);
+        $destination = Storage::disk('local')->path('uploads');
+
+        $fileUpload->move($destination, $fileName);
 
         return $this
             ->httpResponse()
-            ->setMessage(sprintf('File %s has been uploaded successfully. Start validating data...', $file->getClientOriginalName()))
+            ->setMessage(trans('packages/data-synchronize::data-synchronize.import.uploaded_message', [
+                'file' => $fileUpload->getClientOriginalName(),
+            ]))
             ->setData([
                 'file_name' => $fileName,
             ]);

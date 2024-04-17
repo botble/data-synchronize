@@ -4,7 +4,7 @@
     @php
         /** @var \Botble\DataSynchronize\Importer\Importer $importer */
 
-        $acceptedFiles = Arr::join(array_map(fn ($item) => ".$item", $importer->getAcceptedFiles()), ',');
+        $acceptedFiles = Arr::join(array_map(fn ($item) => $item, $importer->getAcceptedFiles()), ',');
     @endphp
 
     {!! apply_filters('data_synchronize_import_page_before', null, $importer) !!}
@@ -63,7 +63,7 @@
                     </div>
 
                     <x-core::form.helper-text class="mt-1">
-                        {{ trans('packages/data-synchronize::data-synchronize.import.form.mime_types_allowed', ['types' => Arr::join($importer->getAcceptedFiles(), ', ')]) }}
+                        {{ trans('packages/data-synchronize::data-synchronize.import.form.allowed_extensions', ['extensions' => Arr::join($importer->getFileExtensions(), ', ')]) }}
                     </x-core::form.helper-text>
                 </div>
 
