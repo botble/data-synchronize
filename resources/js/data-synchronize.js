@@ -33,6 +33,16 @@ $(() => {
         let errors = []
         let total = null
 
+        const output = (message, type) => {
+            if (type) {
+                $output.append(`<p class="text-${type}">${message}</p>`)
+            } else {
+                $output.append(`<p>${message}</p>`)
+            }
+
+            $output.scrollTop($output[0].scrollHeight)
+        }
+
         const dropzone = new Dropzone($form.find('.dropzone').get(0), {
             url: $form.prop('action'),
             headers: {
@@ -67,10 +77,10 @@ $(() => {
                 })
                 .then(({ data }) => {
                     if (data.data.count > 0) {
-                        $output.append(`<p>${data.message}</p>`)
+                        output(data.message)
                         importData(fileName, data.data.offset + limit, limit, data.data.total)
                     } else {
-                        $output.append(`<p class="text-success">${data.message}</p>`)
+                        output(data.message, 'success')
                         cleanup()
                     }
                 })
@@ -94,7 +104,7 @@ $(() => {
                         total = data.data.total
                     }
 
-                    $output.append(`<p>${data.message}</p>`)
+                    output(data.message)
 
                     if (data.data.count > 0) {
                         validate(data.data.file_name, data.data.offset + limit, limit)
@@ -102,7 +112,7 @@ $(() => {
                         if (errors.length === 0) {
                             importData(data.data.file_name, 0)
                         } else {
-                            $output.append(`<p class="text-danger">${$form.data('validate-failed-message')}</p>`)
+                            output($form.data('validate-failed-message'), 'danger')
                         }
                     }
 
@@ -120,19 +130,19 @@ $(() => {
             $output.empty()
             $output.show()
 
-            $output.append(`<p>${$form.data('uploading-message')}</p>`)
+            output($form.data('uploading-message'))
             Botble.showButtonLoading($button)
         })
 
         dropzone.on('success', (file, { data, error, message }) => {
             if (error) {
-                $output.append(`<p class="text-danger">${message}</p>`)
+                output(message, 'danger')
                 cleanup()
 
                 return
             }
 
-            $output.append(`<p>${message}</p>`)
+            output(message)
             validate(data.file_name, 0)
         })
 

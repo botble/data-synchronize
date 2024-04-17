@@ -211,7 +211,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
             ];
         }
 
-        return $requiredColumns;
+        return $columns;
     }
 
     public function format(string $format): self
@@ -239,6 +239,6 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function allColumnsIsDisabled(): bool
     {
-        return count($this->getAcceptedColumns()) === count($this->columns());
+        return count($this->getAcceptedColumns()) === count(array_filter($this->getAcceptedColumns(), fn (ExportColumn $column) => $column->isDisabled()));
     }
 }
