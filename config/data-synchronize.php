@@ -13,4 +13,8 @@ return [
         'xls',
         'xlsx',
     ],
+    'storage' => [
+        'disk' => 'local',
+        'path' => 'data-synchronize',
+    ],
 ];

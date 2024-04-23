@@ -6,8 +6,10 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\PanelSectionManager as PanelSectionManagerFacade;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\DataSynchronize\Commands\ClearChunksCommand;
 use Botble\DataSynchronize\PanelSections\ExportPanelSection;
 use Botble\DataSynchronize\PanelSections\ImportPanelSection;
+use Illuminate\Console\Scheduling\Schedule;
 
 class DataSynchronizeServiceProvider extends ServiceProvider
 {
@@ -24,6 +26,18 @@ class DataSynchronizeServiceProvider extends ServiceProvider
             ->publishAssets()
             ->registerPanelSection()
             ->registerDashboardMenu();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ClearChunksCommand::class,
+            ]);
+
+            $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
+                $schedule
+                    ->command(ClearChunksCommand::class)
+                    ->dailyAt('00:00');
+            });
+        }
     }
 
     protected function getPath(?string $path = null): string

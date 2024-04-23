@@ -128,7 +128,9 @@ abstract class Importer
         if ($count === 0) {
             $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '-' . uniqid() . '.' . pathinfo($fileName, PATHINFO_EXTENSION);
 
-            $this->filesystem()->move("uploads/{$fileName}", "uploads/{$newFileName}");
+            $storageFolder = config('packages.data-synchronize.data-synchronize.storage.path');
+
+            $this->filesystem()->move("$storageFolder/{$fileName}", "$storageFolder/{$newFileName}");
         }
 
         return new ChunkValidateResponse(
@@ -149,7 +151,9 @@ abstract class Importer
         $imported = $this->handle($this->transformRows($rows));
 
         if ($count === 0) {
-            $this->filesystem()->delete("uploads/$fileName");
+            $storageFolder = config('packages.data-synchronize.data-synchronize.storage.path');
+
+            $this->filesystem()->delete("$storageFolder/$fileName");
         }
 
         return new ChunkImportResponse(
@@ -182,7 +186,7 @@ abstract class Importer
 
     public function getRows(string $fileName, int $offset = 0, int $limit = 0): LazyCollection
     {
-        $filePath = sprintf('uploads/%s', $fileName);
+        $filePath = sprintf('%s/%s', config('packages.data-synchronize.data-synchronize.storage.path'), $fileName);
 
         if (! $this->filesystem()->exists($filePath)) {
             throw new FileNotFoundException('File not found at path: ' . $filePath);
@@ -232,7 +236,7 @@ abstract class Importer
 
     public function filesystem(): Filesystem
     {
-        return Storage::disk('local');
+        return Storage::disk(config('packages.data-synchronize.data-synchronize.storage.disk'));
     }
 
     public function downloadExample(string $format)

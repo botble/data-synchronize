@@ -55,7 +55,7 @@ class UploadController extends BaseController
         }
 
         $fileName = $this->createFilename($fileUpload);
-        $destination = Storage::disk('local')->path('uploads');
+        $destination = Storage::disk(config('packages.data-synchronize.data-synchronize.storage.disk'))->path(config('packages.data-synchronize.data-synchronize.storage.path'));
 
         $fileUpload->move($destination, $fileName);
 
