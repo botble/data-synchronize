@@ -121,6 +121,7 @@ public function boot(): void
                     ->withDescription('Export post data to CSV or Excel file.')
                     ->withPriority(120)
                     ->withRoute('tools.data-synchronize.export.posts.index')
+                    ->withPermission('posts.export')
             );
     });
     
