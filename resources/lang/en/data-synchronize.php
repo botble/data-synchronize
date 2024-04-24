@@ -42,6 +42,7 @@ return [
         'heading' => 'Export :label',
 
         'form' => [
+            'total' => 'Total :total :name',
             'all_columns_disabled' => 'Following columns will be exported: :columns.',
             'columns' => 'Columns',
             'format' => 'Format',

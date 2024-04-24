@@ -36,14 +36,16 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
      */
     abstract public function columns(): array;
 
-    public function label(): string
+    abstract public function label(): string;
+
+    public function getLabel(): string
     {
-        return str(static::class)
-            ->afterLast('\\')
-            ->snake()
-            ->replace('_', ' ')
-            ->remove('exporter')
-            ->title();
+        return apply_filters('data_synchronize_exporter_label', $this->label());
+    }
+
+    public function getTotal(): int
+    {
+        return apply_filters('data_synchronize_exporter_total', $this->collection()->count(), $this);
     }
 
     public function getHeading(): string

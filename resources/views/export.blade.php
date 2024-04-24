@@ -15,6 +15,9 @@
                     <x-core::card.title>
                         {{ $exporter->getHeading() }}
                     </x-core::card.title>
+                    <x-core::card.subtitle class="ms-3">
+                        {{ trans('packages/data-synchronize::data-synchronize.export.form.total', ['total' => $exporter->getTotal(), 'name' => $exporter->label()]) }}
+                    </x-core::card.subtitle>
                 </x-core::card.header>
             @endif
 
@@ -30,19 +33,23 @@
                     @else
                         <x-core::form.label>
                             {{ trans('packages/data-synchronize::data-synchronize.export.form.columns') }}
+                            <a href="javascript:void(0)" class="ms-2 text-primary" data-bb-toggle="check-all" data-bb-target=".export-column">Check all</a>
                         </x-core::form.label>
 
-                        @foreach ($exporter->getColumns() as $column)
-                            <x-core::form-group>
-                                <x-core::form.checkbox
-                                    name="columns[]"
-                                    :value="$column->getName()"
-                                    :label="$column->getLabel()"
-                                    :disabled="$column->isDisabled()"
-                                    checked
-                                />
-                            </x-core::form-group>
-                        @endforeach
+                        <div @class(['row row-cols-1', 'row-cols-sm-2 row-cols-lg-3' => count($exporter->getColumns()) > 6])>
+                            @foreach ($exporter->getColumns() as $column)
+                                <x-core::form-group>
+                                    <x-core::form.checkbox
+                                        class="export-column"
+                                        name="columns[]"
+                                        :value="$column->getName()"
+                                        :label="$column->getLabel()"
+                                        :disabled="$column->isDisabled()"
+                                        checked
+                                    />
+                                </x-core::form-group>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
 
@@ -58,7 +65,7 @@
                 </x-core::form.radio-list>
             </x-core::card.body>
             <x-core::card.footer>
-                <x-core::button type="submit" color="primary">
+                <x-core::button type="submit" color="primary" :disabled="$exporter->getTotal() === 0">
                     {{ trans('packages/data-synchronize::data-synchronize.export.form.export_button') }}
                 </x-core::button>
             </x-core::card.footer>
