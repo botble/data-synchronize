@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-use function Laravel\Prompts\info;
-
 #[AsCommand('cms:data-synchronize:clear-chunks', 'Remove all expired chunks')]
 class ClearChunksCommand extends Command
 {
@@ -28,10 +26,10 @@ class ClearChunksCommand extends Command
 
             $storageDisk->deleteDirectory($storagePath);
 
-            info("✔ $expiredFileCount expired chunk files removed");
-            info("✔ $expiredFileSize disk cleared");
+            $this->components->info("$expiredFileCount expired chunk files removed");
+            $this->components->info("$expiredFileSize disk cleared");
         } else {
-            info('✔ No expired chunk files found!');
+            $this->components->info('No expired chunk files found!');
         }
 
         return self::SUCCESS;
@@ -42,7 +40,7 @@ class ClearChunksCommand extends Command
         $size = 0;
 
         foreach (File::glob(rtrim($directory, '/') . '/*', GLOB_NOSORT) as $each) {
-            $size += File::isFile($each) ? File::size($each) : self::calculateAppSize($each);
+            $size += File::isFile($each) ? File::size($each) : $this->calculateChunkSize($each);
         }
 
         return $size;

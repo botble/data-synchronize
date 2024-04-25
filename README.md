@@ -4,7 +4,19 @@
 
 ### Exporter
 
+There are two ways to create an exporter.
+
 ![Exporter](./art/exporter.png)
+
+#### Create an exporter using the command
+
+You can use the `php artisan data-synchronize:make:exporter` command to create an exporter.
+
+```bash
+php artisan data-synchronize:make:exporter PostExporter
+```
+
+#### Manually create an exporter
 
 This is how an exporter should look like, below is an example of a `PostExporter` class.
 
