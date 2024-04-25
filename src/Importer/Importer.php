@@ -26,11 +26,15 @@ abstract class Importer
 
     abstract public function handle(array $data): int;
 
-    abstract public function label(): string;
-
     public function getLabel(): string
     {
-        return apply_filters('data_synchronize_importer_label', $this->label());
+        return str(static::class)
+            ->afterLast('\\')
+            ->snake()
+            ->replace('_', ' ')
+            ->remove('importer')
+            ->trim()
+            ->title();
     }
 
     public static function make(): static

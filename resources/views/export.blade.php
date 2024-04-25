@@ -16,7 +16,7 @@
                         {{ $exporter->getHeading() }}
                     </x-core::card.title>
                     <x-core::card.subtitle class="ms-3">
-                        {{ trans('packages/data-synchronize::data-synchronize.export.form.total', ['total' => $exporter->getTotal(), 'name' => $exporter->label()]) }}
+                        {{ trans('packages/data-synchronize::data-synchronize.export.form.total', ['total' => $exporter->getTotal(), 'name' => $exporter->getLabel()]) }}
                     </x-core::card.subtitle>
                 </x-core::card.header>
             @endif

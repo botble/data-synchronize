@@ -34,11 +34,14 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
      */
     abstract public function columns(): array;
 
-    abstract public function label(): string;
-
     public function getLabel(): string
     {
-        return apply_filters('data_synchronize_exporter_label', $this->label());
+        return str(static::class)
+            ->afterLast('\\')
+            ->snake()
+            ->replace('_', ' ')
+            ->remove('exporter')
+            ->title();
     }
 
     public function getTotal(): int
@@ -50,7 +53,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     {
         return trans(
             'packages/data-synchronize::data-synchronize.export.heading',
-            ['label' => $this->label()]
+            ['label' => $this->getLabel()]
         );
     }
 
@@ -149,7 +152,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function getExportFileName(): string
     {
-        return str_replace(' ', '-', $this->label());
+        return str_replace(' ', '-', $this->getLabel());
     }
 
     public function render(): View
