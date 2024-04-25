@@ -1,0 +1,41 @@
+<?php
+
+namespace {{ namespace }};
+
+use Botble\DataSynchronize\Exporter\ExportColumn;
+use Botble\DataSynchronize\Exporter\Exporter;
+use Illuminate\Support\Collection;
+
+class {{ class }} extends Exporter
+{
+    /**
+     * Set the label of the exporter to display in the admin panel and export file name.
+     */
+    public function label(): string
+    {
+        return '{{ pluralName }}';
+    }
+
+    /**
+     * Define the columns to be exported.
+     */
+    public function columns(): array
+    {
+        return [
+            ExportColumn::make('id')->label('ID'),
+            // Add more columns here
+        ];
+    }
+
+    /**
+     * Retrieve the collection of data to be exported.
+     */
+    public function collection(): Collection
+    {
+        // Implement your logic here to return the collection for exporting
+        // For example, you can fetch data from your database or any other source
+        // E.g. return Post::all();
+
+        return collect();
+    }
+}

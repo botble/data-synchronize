@@ -1,0 +1,15 @@
+<?php
+
+namespace {{ namespace }};
+
+use Botble\DataSynchronize\Exporter\Exporter;
+use Botble\DataSynchronize\Http\Controllers\ExportController;
+use {{ exporterNamespace }};
+
+class {{ class }} extends ExportController
+{
+    protected function getExporter(): Exporter
+    {
+        return {{ exporter }}::make();
+    }
+}

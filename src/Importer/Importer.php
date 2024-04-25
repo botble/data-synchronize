@@ -241,8 +241,7 @@ abstract class Importer
         $columns = $this->getColumns();
         $label = $this->getLabel();
 
-        $exporter = new class($examples, $columns, $label) extends Exporter
-        {
+        $exporter = new class ($examples, $columns, $label) extends Exporter {
             public function __construct(protected array $examples, protected array $columns, protected string $label)
             {
             }

@@ -9,7 +9,6 @@ use Botble\DataSynchronize\Http\Requests\DownloadTemplateRequest;
 use Botble\DataSynchronize\Http\Requests\ImportRequest;
 use Botble\DataSynchronize\Importer\Importer;
 use Exception;
-use Illuminate\Support\Arr;
 
 abstract class ImportController extends BaseController
 {
