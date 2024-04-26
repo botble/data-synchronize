@@ -81,7 +81,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     public function map($row): array
     {
         return array_map(function (ExportColumn $column) use ($row) {
-            $value = $row->{$column->getName()};
+            $value = is_array($row) ? $row[$column->getName()] : $row->{$column->getName()};
 
             return match ($column->getType()) {
                 ExportColumnType::BOOLEAN => $value ? $column->getTrueValue() : $column->getFalseValue(),
