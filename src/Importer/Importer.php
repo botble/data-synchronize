@@ -3,6 +3,7 @@
 namespace Botble\DataSynchronize\Importer;
 
 use Botble\Base\Facades\Assets;
+use Botble\DataSynchronize\Contracts\Importer\WithMapping;
 use Botble\DataSynchronize\DataTransferObjects\ChunkImportResponse;
 use Botble\DataSynchronize\DataTransferObjects\ChunkValidateResponse;
 use Botble\DataSynchronize\Exporter\ExportColumn;
@@ -208,21 +209,25 @@ abstract class Importer
 
     public function transformRows(array $rows): array
     {
-        return array_map(fn ($row) => collect($this->getColumns())
-            ->mapWithKeys(function (ImportColumn $column) use ($row) {
-                $value = $row[$column->getName()] ?? null;
+        return array_map(function ($row) {
+            $row = collect($this->getColumns())
+                ->mapWithKeys(function (ImportColumn $column) use ($row) {
+                    $value = $row[$column->getName()] ?? null;
 
-                if ($column->isNullable() && empty($value)) {
-                    return [$column->getName() => null];
-                }
+                    if ($column->isNullable() && empty($value)) {
+                        return [$column->getName() => null];
+                    }
 
-                if ($column->isBoolean() && is_string($value)) {
-                    $value = $value === $column->getTrueValue() ? 1 : 0;
-                }
+                    if ($column->isBoolean() && is_string($value)) {
+                        $value = $value === $column->getTrueValue() ? 1 : 0;
+                    }
 
-                return [$column->getName() => $value];
-            })
-            ->all(), $rows);
+                    return [$column->getName() => $value];
+                })
+                ->all();
+
+            return $this instanceof WithMapping ? $this->map($row) : $row;
+        }, $rows);
     }
 
     public function getValidationRules(): array
