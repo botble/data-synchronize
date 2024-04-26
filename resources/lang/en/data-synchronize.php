@@ -42,7 +42,6 @@ return [
         'heading' => 'Export :label',
 
         'form' => [
-            'total' => 'Total :total :name',
             'all_columns_disabled' => 'Following columns will be exported: :columns.',
             'columns' => 'Columns',
             'format' => 'Format',
@@ -51,5 +50,11 @@ return [
 
         'success_message' => 'Exported successfully.',
         'error_message' => 'Export failed.',
+
+        'empty_state' => [
+            'title' => 'No data to export',
+            'description' => 'Looks like there is no data to export.',
+            'back' => 'Back to :page',
+        ],
     ],
 ];

@@ -70,7 +70,7 @@ class DataSynchronizeServiceProvider extends ServiceProvider
                     'priority' => 9000,
                     'name' => 'packages/data-synchronize::data-synchronize.tools.export_import_data',
                     'icon' => 'ti ti-package-import',
-                    'route' => 'data-synchronize.tools.data-synchronize',
+                    'route' => 'tools.data-synchronize',
                 ]);
         });
 
