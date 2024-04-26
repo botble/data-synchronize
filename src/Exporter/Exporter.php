@@ -4,6 +4,7 @@ namespace Botble\DataSynchronize\Exporter;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\DataSynchronize\Concerns\Exporter\HasEmptyState;
 use Botble\DataSynchronize\Enums\ExportColumnType;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -23,6 +24,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping
 {
+    use HasEmptyState;
+
     protected ?array $acceptedColumns = [];
 
     protected string $format = Excel::XLSX;
@@ -34,6 +37,11 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
      */
     abstract public function columns(): array;
 
+    public function counters(): array
+    {
+        return [];
+    }
+
     public function getLabel(): string
     {
         return str(static::class)
@@ -44,17 +52,25 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
             ->title();
     }
 
-    public function getTotal(): int
-    {
-        return apply_filters('data_synchronize_exporter_total', $this->collection()->count(), $this);
-    }
-
     public function getHeading(): string
     {
         return trans(
             'packages/data-synchronize::data-synchronize.export.heading',
             ['label' => $this->getLabel()]
         );
+    }
+
+    /**
+     * @return \Botble\DataSynchronize\Exporter\ExportCounter[]
+     */
+    public function getCounters(): array
+    {
+        return apply_filters('data_synchronize_exporter_counters', $this->counters(), $this);
+    }
+
+    public function hasDataToExport(): bool
+    {
+        return true;
     }
 
     public function headings(): array

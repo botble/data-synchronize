@@ -22,7 +22,7 @@ abstract class ExportController extends BaseController
     {
         return parent::breadcrumb()
             ->add(trans('core/base::layouts.tools'))
-            ->add(trans('packages/data-synchronize::data-synchronize.tools.export_import_data'), route('data-synchronize.tools.data-synchronize'));
+            ->add(trans('packages/data-synchronize::data-synchronize.tools.export_import_data'), route('tools.data-synchronize'));
     }
 
     public function index()
