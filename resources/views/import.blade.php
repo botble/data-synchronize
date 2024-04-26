@@ -55,6 +55,8 @@
                     </x-core::alert>
                 @endif
 
+                {!! apply_filters('data_synchronize_import_form_before', null, $importer) !!}
+
                 <div>
                     <div class="dropzone">
                         <div class="dz-message">
@@ -66,6 +68,8 @@
                         {{ trans('packages/data-synchronize::data-synchronize.import.form.allowed_extensions', ['extensions' => Arr::join($importer->getFileExtensions(), ', ')]) }}
                     </x-core::form.helper-text>
                 </div>
+
+                {!! apply_filters('data_synchronize_import_form_after', null, $importer) !!}
 
                 <pre class="mt-3 data-synchronize-import-output" style="display: none"></pre>
             </x-core::card.body>

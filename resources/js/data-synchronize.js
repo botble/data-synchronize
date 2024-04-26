@@ -27,11 +27,16 @@ $(() => {
     const $form = $(document).find('[data-bb-toggle="import-form"]')
 
     if ($form.length > 0) {
+        const formData = new FormData($form.get(0))
         const $button = $form.find('button[type="submit"]')
         const $errors = $form.find('[data-bb-toggle="import-errors"]')
         const $output = $form.find('.data-synchronize-import-output')
         let errors = []
         let total = null
+
+        $form.on('change', (e) => {
+            formData.set(e.target.name, e.target.value)
+        })
 
         const output = (message, type) => {
             if (type) {
@@ -67,14 +72,14 @@ $(() => {
         }
 
         const importData = (fileName, offset, limit = $form.data('chunk-size'), total = 0) => {
+            formData.set('file_name', fileName)
+            formData.set('offset', offset)
+            formData.set('limit', limit)
+            formData.set('total', total)
+
             $httpClient
                 .make()
-                .post($form.data('import-url'), {
-                    file_name: fileName,
-                    offset,
-                    limit,
-                    total,
-                })
+                .post($form.data('import-url'), formData)
                 .then(({ data }) => {
                     if (data.data.count > 0) {
                         output(data.message)
@@ -88,13 +93,13 @@ $(() => {
         }
 
         const validate = (fileName, offset, limit = $form.data('chunk-size')) => {
+            formData.set('file_name', fileName)
+            formData.set('offset', offset)
+            formData.set('limit', limit)
+
             $httpClient
                 .make()
-                .post($form.data('validate-url'), {
-                    file_name: fileName,
-                    offset,
-                    limit,
-                })
+                .post($form.data('validate-url'), formData)
                 .then(({ data }) => {
                     if (data.data.errors.length > 0) {
                         errors = errors.concat(data.data.errors)
