@@ -9,6 +9,7 @@ use Botble\DataSynchronize\Http\Requests\DownloadTemplateRequest;
 use Botble\DataSynchronize\Http\Requests\ImportRequest;
 use Botble\DataSynchronize\Importer\Importer;
 use Exception;
+use Illuminate\Http\Request;
 
 abstract class ImportController extends BaseController
 {
@@ -31,7 +32,7 @@ abstract class ImportController extends BaseController
     public function validateData(ImportRequest $request)
     {
         try {
-            $response = $this->getImporter()->validate(
+            $response = $this->prepareImporter($request)->validate(
                 $request->input('file_name'),
                 $request->input('offset'),
                 $request->input('limit'),
@@ -76,7 +77,7 @@ abstract class ImportController extends BaseController
         }
 
         try {
-            $response = $this->getImporter()->import(
+            $response = $this->prepareImporter($request)->import(
                 $request->input('file_name'),
                 $request->input('offset'),
                 $request->input('limit'),
@@ -125,5 +126,10 @@ abstract class ImportController extends BaseController
         }
 
         return $this->getImporter()->downloadExample($request->input('format'));
+    }
+
+    protected function prepareImporter(Request $request): Importer
+    {
+        return $this->getImporter();
     }
 }
