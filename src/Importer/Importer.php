@@ -6,19 +6,23 @@ use Botble\Base\Facades\Assets;
 use Botble\DataSynchronize\Contracts\Importer\WithMapping;
 use Botble\DataSynchronize\DataTransferObjects\ChunkImportResponse;
 use Botble\DataSynchronize\DataTransferObjects\ChunkValidateResponse;
-use Botble\DataSynchronize\Exporter\ExportColumn;
-use Botble\DataSynchronize\Exporter\Exporter;
+use Botble\DataSynchronize\Exporter\ExampleExporter;
+use Botble\Media\Facades\RvMedia;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\LazyCollection;
+use Illuminate\Support\Str;
 use Spatie\SimpleExcel\SimpleExcelReader;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 abstract class Importer
 {
+    protected bool $isValidating = false;
+
     abstract public function columns(): array;
 
     abstract public function getValidateUrl(): string;
@@ -112,6 +116,8 @@ abstract class Importer
 
     public function validate(string $fileName, int $offset = 0, int $limit = 100): ChunkValidateResponse
     {
+        $this->isValidating = true;
+
         $rows = $this->transformRows($this->getRowsByOffset($fileName, $offset, $limit));
 
         $total = request()->integer('total') ?: $this->getRows($fileName)->count();
@@ -176,7 +182,7 @@ abstract class Importer
     {
         return trans('packages/data-synchronize::data-synchronize.import.done_message', [
             'count' => number_format($count),
-            'label' => $this->getLabel(),
+            'label' => strtolower($this->getLabel()),
         ]);
     }
 
@@ -214,13 +220,11 @@ abstract class Importer
                 ->mapWithKeys(function (ImportColumn $column) use ($row) {
                     $value = $row[$column->getName()] ?? null;
 
-                    if ($column->isNullable() && empty($value)) {
-                        return [$column->getName() => null];
-                    }
-
-                    if ($column->isBoolean() && is_string($value)) {
-                        $value = $value === $column->getTrueValue() ? 1 : 0;
-                    }
+                    $value = match (true) {
+                        $column->isNullable() && empty($value) => null,
+                        $column->isBoolean() && is_string($value) => $value === $column->getTrueValue() ? 1 : 0,
+                        default => $value,
+                    };
 
                     return [$column->getName() => $value];
                 })
@@ -244,36 +248,31 @@ abstract class Importer
         return Storage::disk(config('packages.data-synchronize.data-synchronize.storage.disk'));
     }
 
-    public function downloadExample(string $format)
+    public function downloadExample(string $format): BinaryFileResponse
     {
-        $examples = $this->getExamples();
         $columns = $this->getColumns();
-        $label = $this->getLabel();
-
-        $exporter = new class ($examples, $columns, $label) extends Exporter {
-            public function __construct(protected array $examples, protected array $columns, protected string $label)
-            {
-            }
-
-            public function columns(): array
-            {
-                return array_map(fn (ImportColumn $item) => ExportColumn::make($item->getName())->label($item->getLabel()), $this->columns);
-            }
-
-            public function getExportFileName(): string
-            {
-                return sprintf('%s-example', str($this->label)->trim()->replace(' ', '-'));
-            }
-
-            public function collection(): Collection
-            {
-                return collect($this->examples)->map(fn ($item) => (object) $item);
-            }
-        };
+        $exporter = (new ExampleExporter($this->getExamples(), $columns, $this->getLabel()));
 
         return $exporter
             ->format($format)
             ->acceptedColumns(array_map(fn (ImportColumn $column) => $column->getName(), $columns))
             ->export();
+    }
+
+    protected function resolveMediaImage(string $url, ?string $directory = null): string
+    {
+        if (! Str::startsWith($url, ['http://', 'https://'])) {
+            return $url;
+        }
+
+        $result = RvMedia::uploadFromUrl($url, 0, $directory);
+
+        if ($result['error']) {
+            Log::error($result['message']);
+
+            return $url;
+        }
+
+        return $result['data']->url;
     }
 }
