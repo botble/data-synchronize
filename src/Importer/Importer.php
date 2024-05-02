@@ -21,8 +21,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 abstract class Importer
 {
-    protected bool $isValidating = false;
-
     abstract public function columns(): array;
 
     abstract public function getValidateUrl(): string;
@@ -116,8 +114,6 @@ abstract class Importer
 
     public function validate(string $fileName, int $offset = 0, int $limit = 100): ChunkValidateResponse
     {
-        $this->isValidating = true;
-
         $rows = $this->transformRows($this->getRowsByOffset($fileName, $offset, $limit));
 
         $total = request()->integer('total') ?: $this->getRows($fileName)->count();
