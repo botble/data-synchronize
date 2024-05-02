@@ -11,7 +11,7 @@ class {{ class }} extends Exporter
     /**
      * Set the label of the exporter to display in the admin panel and export file name.
      */
-    public function label(): string
+    public function getLabel(): string
     {
         return '{{ pluralName }}';
     }

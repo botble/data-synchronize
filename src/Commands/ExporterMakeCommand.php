@@ -128,7 +128,7 @@ class ExporterMakeCommand extends GeneratorCommand
 
         $this->components->info(sprintf(
             'Please add following code into the <comment>%s</comment> file:',
-            plugin_path("{$this->argument('plugin')}/routes/data-synchronize.php")
+            plugin_path("{$this->argument('plugin')}/routes/web.php")
         ));
 
         info($route);
