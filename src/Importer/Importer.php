@@ -60,6 +60,11 @@ abstract class Importer
         return apply_filters('data_synchronize_importer_example', $this->examples());
     }
 
+    public function showRulesCheatSheet(): bool
+    {
+        return ! empty(array_filter($this->getValidationRules()));
+    }
+
     public function getAcceptedFiles(): array
     {
         return apply_filters(

@@ -101,7 +101,7 @@
         @include('packages/data-synchronize::partials.example')
     @endif
 
-    @include('packages/data-synchronize::partials.rules')
+    @includeWhen($importer->showRulesCheatSheet(), 'packages/data-synchronize::partials.rules')
 @stop
 
 @push('footer')
