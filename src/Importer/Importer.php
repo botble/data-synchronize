@@ -11,6 +11,8 @@ use Botble\Media\Facades\RvMedia;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -94,6 +96,11 @@ abstract class Importer
     public function getDownloadExampleUrl(): ?string
     {
         return null;
+    }
+
+    public function mergeWithUndefinedColumns(): bool
+    {
+        return false;
     }
 
     public function getHeading(): string
@@ -225,9 +232,9 @@ abstract class Importer
     public function transformRows(array $rows): array
     {
         return array_map(function ($row) {
-            $row = collect($this->getColumns())
+            $formatted = collect($this->getColumns())
                 ->mapWithKeys(function (ImportColumn $column) use ($row) {
-                    $value = $row[$column->getHeading()] ?? null;
+                    $value = Arr::pull($row, $column->getHeading());
 
                     $value = match (true) {
                         $column->isNullable() && empty($value) => null,
@@ -239,7 +246,10 @@ abstract class Importer
                 })
                 ->all();
 
-            return $this instanceof WithMapping ? $this->map($row) : $row;
+            return [
+                ...($this instanceof WithMapping ? $this->map($formatted) : $formatted),
+                ...($this->mergeWithUndefinedColumns() ? $row : []),
+            ];
         }, $rows);
     }
 
