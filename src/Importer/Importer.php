@@ -62,7 +62,7 @@ abstract class Importer
 
     public function showRulesCheatSheet(): bool
     {
-        return count(array_filter($this->getValidationRules()));
+        return ! empty(array_filter($this->getValidationRules()));
     }
 
     public function getAcceptedFiles(): array
