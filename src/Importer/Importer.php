@@ -112,6 +112,11 @@ abstract class Importer
         );
     }
 
+    public function headerToSnakeCase(): bool
+    {
+        return true;
+    }
+
     public function validate(string $fileName, int $offset = 0, int $limit = 100): ChunkValidateResponse
     {
         $rows = $this->transformRows($this->getRowsByOffset($fileName, $offset, $limit));
@@ -195,8 +200,11 @@ abstract class Importer
             throw new FileNotFoundException('File not found at path: ' . $filePath);
         }
 
-        $reader = SimpleExcelReader::create($this->filesystem()->path($filePath))
-            ->headersToSnakeCase();
+        $reader = SimpleExcelReader::create($this->filesystem()->path($filePath));
+
+        if ($this->headerToSnakeCase()) {
+            $reader->headersToSnakeCase();
+        }
 
         if ($offset > 0) {
             $reader->skip($offset);
@@ -214,7 +222,7 @@ abstract class Importer
         return array_map(function ($row) {
             $row = collect($this->getColumns())
                 ->mapWithKeys(function (ImportColumn $column) use ($row) {
-                    $value = $row[$column->getName()] ?? null;
+                    $value = $row[$column->getHeading()] ?? null;
 
                     $value = match (true) {
                         $column->isNullable() && empty($value) => null,

@@ -18,13 +18,13 @@ class ImportColumn
 
     protected string $falseValue;
 
-    public function __construct(protected string $name)
+    public function __construct(protected string $name, protected ?string $heading)
     {
     }
 
-    public static function make(string $name): static
+    public static function make(string $name, ?string $heading = null): static
     {
-        return new static($name);
+        return new static($name, $heading);
     }
 
     public function rules(array $rules, ?string $description = null): static
@@ -59,6 +59,18 @@ class ImportColumn
         return $this;
     }
 
+    public function heading(string $heading): static
+    {
+        $this->heading = $heading;
+
+        return $this;
+    }
+
+    public function getHeading(): string
+    {
+        return $this->heading ?? $this->getName();
+    }
+
     public function getName(): string
     {
         return $this->name;
@@ -78,6 +90,10 @@ class ImportColumn
     {
         if (isset($this->label)) {
             return $this->label;
+        }
+
+        if (isset($this->heading)) {
+            return $this->heading;
         }
 
         return str($this->name)
