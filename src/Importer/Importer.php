@@ -11,6 +11,7 @@ use Botble\Media\Facades\RvMedia;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -96,6 +97,11 @@ abstract class Importer
         return null;
     }
 
+    public function mergeWithUndefinedColumns(): bool
+    {
+        return false;
+    }
+
     public function getHeading(): string
     {
         return trans(
@@ -115,6 +121,11 @@ abstract class Importer
             apply_filters('data_synchronize_importer_view', 'packages/data-synchronize::import'),
             ['importer' => $this]
         );
+    }
+
+    public function headerToSnakeCase(): bool
+    {
+        return true;
     }
 
     public function validate(string $fileName, int $offset = 0, int $limit = 100): ChunkValidateResponse
@@ -200,8 +211,11 @@ abstract class Importer
             throw new FileNotFoundException('File not found at path: ' . $filePath);
         }
 
-        $reader = SimpleExcelReader::create($this->filesystem()->path($filePath))
-            ->headersToSnakeCase();
+        $reader = SimpleExcelReader::create($this->filesystem()->path($filePath));
+
+        if ($this->headerToSnakeCase()) {
+            $reader->headersToSnakeCase();
+        }
 
         if ($offset > 0) {
             $reader->skip($offset);
@@ -217,9 +231,9 @@ abstract class Importer
     public function transformRows(array $rows): array
     {
         return array_map(function ($row) {
-            $row = collect($this->getColumns())
+            $formatted = collect($this->getColumns())
                 ->mapWithKeys(function (ImportColumn $column) use ($row) {
-                    $value = $row[$column->getName()] ?? null;
+                    $value = Arr::pull($row, $column->getHeading());
 
                     $value = match (true) {
                         $column->isNullable() && empty($value) => null,
@@ -231,7 +245,10 @@ abstract class Importer
                 })
                 ->all();
 
-            return $this instanceof WithMapping ? $this->map($row) : $row;
+            return [
+                ...($this instanceof WithMapping ? $this->map($formatted) : $formatted),
+                ...($this->mergeWithUndefinedColumns() ? $row : []),
+            ];
         }, $rows);
     }
 
