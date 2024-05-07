@@ -22,6 +22,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 abstract class Importer
 {
+    protected bool $renderWithoutLayout = false;
+
     abstract public function columns(): array;
 
     abstract public function getValidateUrl(): string;
@@ -110,6 +112,13 @@ abstract class Importer
         );
     }
 
+    public function renderWithoutLayout(): View
+    {
+        $this->renderWithoutLayout = true;
+
+        return $this->render();
+    }
+
     public function render(): View
     {
         Assets::addStylesDirectly('vendor/core/packages/data-synchronize/css/data-synchronize.css')
@@ -117,8 +126,14 @@ abstract class Importer
             ->addScripts('dropzone')
             ->addStyles('dropzone');
 
+        $view = 'packages/data-synchronize::import';
+
+        if ($this->renderWithoutLayout) {
+            $view = 'packages/data-synchronize::partials.importer';
+        }
+
         return view(
-            apply_filters('data_synchronize_importer_view', 'packages/data-synchronize::import'),
+            apply_filters('data_synchronize_importer_view', $view),
             ['importer' => $this]
         );
     }
