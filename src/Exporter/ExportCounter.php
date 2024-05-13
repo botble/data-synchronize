@@ -4,7 +4,7 @@ namespace Botble\DataSynchronize\Exporter;
 
 class ExportCounter
 {
-    protected string $value;
+    protected string|int $value;
 
     protected string $label;
 
@@ -13,7 +13,7 @@ class ExportCounter
         return new static();
     }
 
-    public function value(string $value): static
+    public function value(string|int $value): static
     {
         $this->value = $value;
 
