@@ -71,7 +71,7 @@ $(() => {
             dropzone.removeAllFiles()
         }
 
-        const importData = (fileName, offset, limit = $form.data('chunk-size'), total = 0) => {
+        const importData = (fileName, offset, limit = parseInt($form.find('input[name=chunk_size]').val()), total = 0) => {
             formData.set('file_name', fileName)
             formData.set('offset', offset)
             formData.set('limit', limit)
@@ -92,7 +92,7 @@ $(() => {
                 .catch(() => cleanup())
         }
 
-        const validate = (fileName, offset, limit = $form.data('chunk-size')) => {
+        const validate = (fileName, offset, limit = parseInt($form.find('input[name=chunk_size]').val())) => {
             formData.set('file_name', fileName)
             formData.set('offset', offset)
             formData.set('limit', limit)

@@ -16,6 +16,8 @@ return [
             'dropzone_message' => 'Drag and drop file here or click to upload',
             'allowed_extensions' => 'Choose a file with following extensions: :extensions.',
             'import_button' => 'Import',
+            'chunk_size' => 'Chunk size',
+            'chunk_size_helper' => 'The number of rows to be imported at a time is defined by the chunk size. Increase this value if you have a large file and data is imported very fast. Decrease this value if you encounter memory limits or gateway timeout issues when importing data.',
         ],
 
         'example' => [

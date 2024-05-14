@@ -13,7 +13,6 @@
     :data-import-url="$importer->getImportUrl()"
     data-bb-toggle="import-form"
     :data-accepted-files="$acceptedFiles"
-    :data-chunk-size="$importer->chunkSize()"
     :data-uploading-message="trans('packages/data-synchronize::data-synchronize.import.uploading_message')"
     :data-validate-failed-message="trans('packages/data-synchronize::data-synchronize.import.validating_failed_message')"
     class="data-synchronize-import-form"
@@ -54,7 +53,7 @@
 
             {!! apply_filters('data_synchronize_import_form_before', null, $importer) !!}
 
-            <div>
+            <div class="mb-3">
                 <div class="dropzone">
                     <div class="dz-message">
                         {{ trans('packages/data-synchronize::data-synchronize.import.form.dropzone_message') }}
@@ -63,6 +62,14 @@
 
                 <x-core::form.helper-text class="mt-1">
                     {{ trans('packages/data-synchronize::data-synchronize.import.form.allowed_extensions', ['extensions' => Arr::join($importer->getFileExtensions(), ', ')]) }}
+                </x-core::form.helper-text>
+            </div>
+
+            <div class="mb-3">
+                <x-core::form.label for="chunk-size">{{ trans('packages/data-synchronize::data-synchronize.import.form.chunk_size') }}</x-core::form.label>
+                <x-core::form.text-input type="number" class="form-control" id="chunk-size" name="chunk_size" value="{{ $importer->chunkSize() }}" />
+                <x-core::form.helper-text>
+                    {{ trans('packages/data-synchronize::data-synchronize.import.form.chunk_size_helper') }}
                 </x-core::form.helper-text>
             </div>
 
