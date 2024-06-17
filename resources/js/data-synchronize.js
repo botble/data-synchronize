@@ -30,8 +30,11 @@ $(() => {
         const formData = new FormData($form.get(0))
         const $button = $form.find('button[type="submit"]')
         const $errors = $form.find('[data-bb-toggle="import-errors"]')
+        const $failures = $form.find('[data-bb-toggle="import-failures"]')
+        const $failureTemplate = $('#failures-template')
         const $output = $form.find('.data-synchronize-import-output')
         let errors = []
+        let failures = []
         let total = null
 
         $form.on('change', (e) => {
@@ -81,12 +84,27 @@ $(() => {
                 .make()
                 .post($form.data('import-url'), formData)
                 .then(({ data }) => {
+                    if (data.data.failures.length > 0) {
+                        failures = failures.concat(data.data.failures)
+                    }
+
                     if (data.data.count > 0) {
                         output(data.message)
                         importData(fileName, data.data.offset + limit, limit, data.data.total)
                     } else {
                         output(data.message, 'success')
                         cleanup()
+
+                        if (failures.length > 0) {
+                            $failures.find('tbody').html(
+                                failures.map((failure) => $failureTemplate.html()
+                                    .replace(new RegExp('__index__', 'g'), `#${failure.row}`)
+                                    .replace(new RegExp('__attribute__', 'g'), failure.attribute)
+                                    .replace(new RegExp('__errors__', 'g'), failure.errors.map((error) => `<li>${error}</li>`).join('')))
+                                    .join('')
+                            )
+                            $failures.show()
+                        }
                     }
                 })
                 .catch(() => cleanup())
@@ -136,6 +154,8 @@ $(() => {
         dropzone.on('sending', () => {
             $output.empty()
             $output.show()
+            errors = []
+            failures = []
 
             output($form.data('uploading-message'))
             Botble.showButtonLoading($button)

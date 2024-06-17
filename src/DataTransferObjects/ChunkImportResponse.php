@@ -8,6 +8,7 @@ class ChunkImportResponse extends ChunkResponse
         public int $offset,
         public int $count,
         public int $imported,
+        public array $failures = [],
     ) {
         parent::__construct($offset, $count);
     }
