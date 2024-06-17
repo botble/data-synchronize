@@ -3,6 +3,7 @@
 namespace Botble\DataSynchronize\Importer;
 
 use Botble\Base\Facades\Assets;
+use Botble\DataSynchronize\Concerns\Importer\HasImportResults;
 use Botble\DataSynchronize\Contracts\Importer\WithMapping;
 use Botble\DataSynchronize\DataTransferObjects\ChunkImportResponse;
 use Botble\DataSynchronize\DataTransferObjects\ChunkValidateResponse;
@@ -22,6 +23,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 abstract class Importer
 {
+    use HasImportResults;
+
     protected bool $renderWithoutLayout = false;
 
     abstract public function columns(): array;
@@ -179,10 +182,17 @@ abstract class Importer
     public function import(string $fileName, int $offset = 0, int $limit = 100): ChunkImportResponse
     {
         $rows = $this->getRowsByOffset($fileName, $offset, $limit);
-
         $count = count($rows);
+        $rows = $this->transformRows($rows);
 
-        $imported = $this->handle($this->transformRows($rows));
+        $rowNumber = 0;
+        $rows = array_filter($rows, function () use (&$rowNumber) {
+            $rowNumber++;
+
+            return ! in_array($rowNumber, $this->failures()->map(fn ($failure) => $failure['row'])->all());
+        });
+
+        $imported = $this->handle($rows);
 
         if ($count === 0) {
             $storageFolder = config('packages.data-synchronize.data-synchronize.storage.path');
@@ -194,6 +204,7 @@ abstract class Importer
             offset: $offset,
             count: $count,
             imported: $imported,
+            failures: $this->failures()->all()
         );
     }
 

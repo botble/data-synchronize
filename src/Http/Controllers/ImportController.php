@@ -107,6 +107,7 @@ abstract class ImportController extends BaseController
                     'offset' => $response->offset,
                     'count' => $response->count,
                     'total' => $total,
+                    'failures' => $response->failures,
                 ]);
         } catch (Exception $e) {
             return $this
