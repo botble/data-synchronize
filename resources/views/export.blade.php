@@ -1,4 +1,4 @@
-@extends(BaseHelper::getAdminMasterLayoutTemplate())
+@extends($exporter->getLayout())
 
 @section('content')
     <x-core::form
