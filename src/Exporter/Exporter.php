@@ -60,6 +60,11 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
         );
     }
 
+    public function getLayout(): string
+    {
+        return BaseHelper::getAdminMasterLayoutTemplate();
+    }
+
     /**
      * @return \Botble\DataSynchronize\Exporter\ExportCounter[]
      */

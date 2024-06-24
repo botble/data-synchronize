@@ -3,6 +3,7 @@
 namespace Botble\DataSynchronize\Importer;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\DataSynchronize\Concerns\Importer\HasImportResults;
 use Botble\DataSynchronize\Contracts\Importer\WithMapping;
 use Botble\DataSynchronize\DataTransferObjects\ChunkImportResponse;
@@ -54,6 +55,11 @@ abstract class Importer
     public function examples(): array
     {
         return [];
+    }
+
+    public function getLayout(): string
+    {
+        return BaseHelper::getAdminMasterLayoutTemplate();
     }
 
     public function getColumns(): array
