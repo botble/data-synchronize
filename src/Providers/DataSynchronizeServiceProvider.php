@@ -9,6 +9,8 @@ use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\DataSynchronize\Commands\ClearChunksCommand;
 use Botble\DataSynchronize\Commands\ExportControllerMakeCommand;
 use Botble\DataSynchronize\Commands\ExporterMakeCommand;
+use Botble\DataSynchronize\Commands\ImportControllerMakeCommand;
+use Botble\DataSynchronize\Commands\ImporterMakeCommand;
 use Botble\DataSynchronize\PanelSections\ExportPanelSection;
 use Botble\DataSynchronize\PanelSections\ImportPanelSection;
 use Illuminate\Console\Scheduling\Schedule;
@@ -31,7 +33,9 @@ class DataSynchronizeServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                ImporterMakeCommand::class,
                 ExporterMakeCommand::class,
+                ImportControllerMakeCommand::class,
                 ExportControllerMakeCommand::class,
                 ClearChunksCommand::class,
             ]);

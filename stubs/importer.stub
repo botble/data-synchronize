@@ -1,0 +1,76 @@
+<?php
+
+namespace {{ namespace }};
+
+use Botble\DataSynchronize\Importer\ImportColumn;
+use Botble\DataSynchronize\Importer\Importer;
+
+class {{ class }} extends Importer
+{
+    public function getLabel(): string
+    {
+        return '{{ pluralName }}';
+    }
+
+    /**
+     * Set the chunk size for importing data.
+     */
+    public function chunkSize(): int
+    {
+        return 1000;
+    }
+
+    public function getValidateUrl(): string
+    {
+        return route('tools.data-synchronize.import.{{ pluralNameLowercase }}.validate');
+    }
+
+    public function getImportUrl(): string
+    {
+        return route('tools.data-synchronize.import.{{ pluralNameLowercase }}.store');
+    }
+
+    public function getDownloadExampleUrl(): ?string
+    {
+        return route('tools.data-synchronize.import.{{ pluralNameLowercase }}.download-example');
+    }
+
+    /**
+     * Define the columns for importing data.
+     */
+    public function columns(): array
+    {
+        return [
+            ImportColumn::make('name')->label('Name'),
+            // Add more columns here
+        ];
+    }
+
+    /**
+     * Define the examples for importing data.
+     */
+    public function examples(): array
+    {
+        return [
+            [
+                'name' => 'John Doe',
+                // Add more columns here
+            ],
+        ];
+    }
+
+    /**
+     * Handle the importing data. Return the total imported rows.
+     */
+    public function handle(array $data): int
+    {
+        $total = 0;
+
+        foreach ($data as $item) {
+            // Import data here
+            $total++;
+        }
+
+        return $total;
+    }
+}

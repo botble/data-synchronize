@@ -9,26 +9,26 @@ use function Laravel\Prompts\info;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name: 'data-synchronize:make:exporter', description: 'Make a new exporter')]
-class ExporterMakeCommand extends GeneratorCommand
+#[AsCommand(name: 'data-synchronize:make:importer', description: 'Make a new importer')]
+class ImporterMakeCommand extends GeneratorCommand
 {
-    protected $type = 'Exporter';
+    protected $type = 'Importer';
 
     public function handle(): void
     {
         if (parent::handle() === null) {
             $this->promptCreateAdditional();
 
-            $this->components->info(sprintf('Exporter <comment>%s</comment> has been created successfully.', $this->getNameInput()));
+            $this->components->info(sprintf('Importer <comment>%s</comment> has been created successfully.', $this->getNameInput()));
         }
     }
 
     protected function promptCreateAdditional(): void
     {
-        $createController = confirm('Do you want to create a controller for this exporter?', true);
-        $createPermission = confirm('Do you want to create a permission for this exporter?', true);
-        $createRoute = confirm('Do you want to create a route for this exporter?', true);
-        $panelSection = confirm('Do you want to register this exporter in the Export/Import Data panel section?', true);
+        $createController = confirm('Do you want to create a controller for this importer?', true);
+        $createPermission = confirm('Do you want to create a permission for this importer?', true);
+        $createRoute = confirm('Do you want to create a route for this importer?', true);
+        $panelSection = confirm('Do you want to register this importer in the Export/Import Data panel section?', true);
 
         if ($createController) {
             $this->createController();
@@ -47,32 +47,13 @@ class ExporterMakeCommand extends GeneratorCommand
         }
     }
 
-    protected function replacePluralName(string $stub): string
-    {
-        return str_replace('{{ pluralName }}', $this->getPluralName(), $stub);
-    }
-
-    protected function buildClass($name): string
-    {
-        return $this->replacePluralName(
-            parent::buildClass($name)
-        );
-    }
-
-    protected function getPluralName(): Stringable
-    {
-        return str($this->getNameInput())
-            ->replace('Exporter', '')
-            ->plural();
-    }
-
     protected function createController(): void
     {
-        $name = str_replace('Exporter', '', $this->getNameInput());
+        $name = str_replace('Importer', '', $this->getNameInput());
 
-        $this->call('data-synchronize:make:export-controller', [
-            'name' => "Export{$name}Controller",
-            'exporter' => "{$name}Exporter",
+        $this->call('data-synchronize:make:import-controller', [
+            'name' => "Import{$name}Controller",
+            'importer' => "{$name}Importer",
             'plugin' => $this->argument('plugin'),
         ]);
     }
@@ -83,7 +64,7 @@ class ExporterMakeCommand extends GeneratorCommand
 
         $stub = <<<'PHP'
         [
-            'name' => 'Export {{ name }}',
+            'name' => 'Import {{ name }}',
             'flag' => '{{ flag }}',
             'parent_flag' => 'tools.data-synchronize',
         ],
@@ -107,10 +88,12 @@ class ExporterMakeCommand extends GeneratorCommand
         use {{ namespace }};
 
         Route::prefix('tools/data-synchronize')->name('tools.data-synchronize.')->group(function () {
-            Route::prefix('export')->name('export.')->group(function () {
+            Route::prefix('import')->name('import.')->group(function () {
                 Route::group(['prefix' => '{{ route }}', 'as' => '{{ route }}.', 'permission' => '{{ permission }}'], function () {
                     Route::get('/', [{{ controllerName }}::class, 'index'])->name('index');
-                    Route::post('/', [{{ controllerName }}::class, 'store'])->name('store');
+                    Route::post('/', [{{ controllerName }}::class, 'import'])->name('store');
+                    Route::post('validate', [{{ controllerName }}::class, 'validateData'])->name('validate');
+                    Route::post('download-example', [{{ controllerName }}::class, 'downloadExample'])->name('download-example');
                 });
             });
         });
@@ -118,7 +101,7 @@ class ExporterMakeCommand extends GeneratorCommand
 
         $name = $this->getPluralName();
         $singularName = $name->singular();
-        $controllerName = "Export{$singularName}Controller";
+        $controllerName = "Import{$singularName}Controller";
 
         $route = str($stub)
             ->replace('{{ namespace }}', "{$this->rootNamespace()}Http\Controllers\\$controllerName")
@@ -139,17 +122,17 @@ class ExporterMakeCommand extends GeneratorCommand
         $stub = <<<'PHP'
         use Botble\Base\Facades\PanelSectionManager;
         use Botble\Base\PanelSections\PanelSectionItem;
-        use Botble\DataSynchronize\PanelSections\ExportPanelSection;
+        use Botble\DataSynchronize\PanelSections\ImportPanelSection;
 
         PanelSectionManager::setGroupId('data-synchronize')->beforeRendering(function () {
             PanelSectionManager::default()->registerItem(
-                ExportPanelSection::class,
+                ImportPanelSection::class,
                 fn () => PanelSectionItem::make('{{ name }}')
                     ->setTitle('{{ title }}')
                     ->withDescription('{{ description }}')
                     ->withPriority(999)
                     ->withPermission('{{ permission }}')
-                    ->withRoute('tools.data-synchronize.export.{{ route }}.index')
+                    ->withRoute('tools.data-synchronize.import.{{ route }}.index')
             );
         });
         PHP;
@@ -159,7 +142,7 @@ class ExporterMakeCommand extends GeneratorCommand
         $panelSection = str($stub)
             ->replace('{{ name }}', $name->slug())
             ->replace('{{ title }}', $name->title())
-            ->replace('{{ description }}', "Export {$name->title()} data to a CSV or Excel file.")
+            ->replace('{{ description }}', "Import {$name->title()} data from CSV or Excel file.")
             ->replace('{{ permission }}', $this->getPermissionFlag())
             ->replace('{{ route }}', $name->slug());
 
@@ -170,28 +153,51 @@ class ExporterMakeCommand extends GeneratorCommand
 
     protected function getPermissionFlag(): string
     {
-        return "{$this->getPluralName()->slug()}.export";
+        return "{$this->getPluralName()->slug()}.import";
+    }
+
+    protected function buildClass($name): string
+    {
+        return $this->replacePluralName(
+            parent::buildClass($name)
+        );
+    }
+
+    protected function replacePluralName(string $stub): string
+    {
+        return str_replace(
+            '{{ pluralNameLowercase }}',
+            $this->getPluralName()->lower(),
+            str_replace('{{ pluralName }}', $this->getPluralName(), $stub),
+        );
     }
 
     protected function getStub(): string
     {
-        return $this->resolveStubPath('exporter');
+        return $this->resolveStubPath('importer');
+    }
+
+    protected function getPluralName(): Stringable
+    {
+        return str($this->getNameInput())
+            ->replace('Importer', '')
+            ->plural();
     }
 
     protected function getDefaultNamespace($rootNamespace): string
     {
-        return $rootNamespace . '\Exporters';
+        return $rootNamespace . '\Importers';
     }
 
     protected function getNameInput(): string
     {
         $name = parent::getNameInput();
 
-        if (str_ends_with($name, 'Exporter')) {
+        if (str_ends_with($name, 'Importer')) {
             return $name;
         }
 
-        return "{$name}Exporter";
+        return "{$name}Importer";
     }
 
     protected function promptForMissingArgumentsUsing(): array
@@ -200,7 +206,7 @@ class ExporterMakeCommand extends GeneratorCommand
             ...parent::promptForMissingArgumentsUsing(),
             'name' => [
                 'What should the ' . strtolower($this->type) . ' be named?',
-                'E.g. PostExporter or Post',
+                'E.g. PostImporter or Post',
             ],
         ];
     }
