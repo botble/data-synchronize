@@ -145,7 +145,6 @@ You can see the exporter in the **Export/Import Data** panel section.
 
 ![Panel Section](./art/panel-section-2.png)
 
-
 ### Importer
 
 There are two ways to create an importer.
