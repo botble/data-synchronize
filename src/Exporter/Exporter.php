@@ -6,7 +6,9 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\DataSynchronize\Concerns\Exporter\HasEmptyState;
 use Botble\DataSynchronize\Enums\ExportColumnType;
+use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
@@ -173,7 +175,12 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function getExportFileName(): string
     {
-        return str_replace(' ', '-', $this->getLabel());
+        return sprintf(
+            '%s-%s.%s',
+            Str::slug($this->getLabel()),
+            BaseHelper::formatDateTime(Carbon::now(), 'Y-m-d-H-i-s'),
+            $this->format
+        );
     }
 
     public function render(): View
@@ -201,7 +208,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
             },
         ];
 
-        return ExcelFacade::download($this, "{$this->getExportFileName()}.{$this->format}", $writeType, $headers);
+        return ExcelFacade::download($this, $this->getExportFileName(), $writeType, $headers);
     }
 
     public function acceptedColumns(?array $columns): self
