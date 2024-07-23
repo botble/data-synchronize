@@ -33,7 +33,7 @@ class ExportCommand extends Command implements PromptsForMissingInput
         );
         $path = $this->argument('path') ?: text(
             'Where do you want to save the file?',
-            'E.g. storage/app/exports'
+            'E.g. storage/app/exports',
         );
         $format = $this->option('format') ?: select(
             label: 'Which format do you want to export?',
@@ -121,7 +121,7 @@ class ExportCommand extends Command implements PromptsForMissingInput
                 }
             });
 
-        return $exporters;
+        return array_combine($exporters, $exporters);
     }
 
     protected function resolveExporterNamespace(string $path): string

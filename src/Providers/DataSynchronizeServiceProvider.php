@@ -10,6 +10,7 @@ use Botble\DataSynchronize\Commands\ClearChunksCommand;
 use Botble\DataSynchronize\Commands\ExportCommand;
 use Botble\DataSynchronize\Commands\ExportControllerMakeCommand;
 use Botble\DataSynchronize\Commands\ExporterMakeCommand;
+use Botble\DataSynchronize\Commands\ImportCommand;
 use Botble\DataSynchronize\Commands\ImportControllerMakeCommand;
 use Botble\DataSynchronize\Commands\ImporterMakeCommand;
 use Botble\DataSynchronize\PanelSections\ExportPanelSection;
@@ -40,6 +41,7 @@ class DataSynchronizeServiceProvider extends ServiceProvider
                 ExportControllerMakeCommand::class,
                 ClearChunksCommand::class,
                 ExportCommand::class,
+                ImportCommand::class,
             ]);
 
             $this->app->afterResolving(Schedule::class, function (Schedule $schedule) {
