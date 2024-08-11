@@ -8,7 +8,16 @@ $(() => {
 
         httpClient
             .post($form.prop('action'), data)
-            .then(({ headers, data }) => {
+            .then(async ({ headers, data }) => {
+                if (headers['content-disposition'] === undefined) {
+                    const isJsonBlob = (data) => data instanceof Blob && data.type === "application/json";
+                    const responseData = isJsonBlob(data) ? await (data)?.text() : data || {};
+                    const responseJson = (typeof responseData === "string") ? JSON.parse(responseData) : responseData;
+
+                    Botble.showError(responseJson?.message || $form.data('error-message'))
+
+                    return
+                }
                 const [_, filename] = headers['content-disposition'].split('filename=')
                 const url = window.URL.createObjectURL(data)
                 const a = document.createElement('a')
@@ -19,7 +28,8 @@ $(() => {
 
                 Botble.showSuccess($form.data('success-message'))
             })
-            .catch(() => {
+            .catch((error) => {
+                console.log(error)
                 Botble.showError($form.data('error-message'))
             })
     }
