@@ -173,7 +173,9 @@ abstract class Importer
 
             $storageFolder = config('packages.data-synchronize.data-synchronize.storage.path');
 
-            $this->filesystem()->move("$storageFolder/{$fileName}", "$storageFolder/{$newFileName}");
+            if ($this->filesystem()->exists("$storageFolder/{$fileName}")) {
+                $this->filesystem()->move("$storageFolder/{$fileName}", "$storageFolder/{$newFileName}");
+            }
         }
 
         return new ChunkValidateResponse(
@@ -203,7 +205,9 @@ abstract class Importer
         if ($count === 0) {
             $storageFolder = config('packages.data-synchronize.data-synchronize.storage.path');
 
-            $this->filesystem()->delete("$storageFolder/$fileName");
+            if ($this->filesystem()->exists("$storageFolder/$fileName")) {
+                $this->filesystem()->delete("$storageFolder/$fileName");
+            }
         }
 
         return new ChunkImportResponse(
