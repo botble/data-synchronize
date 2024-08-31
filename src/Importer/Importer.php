@@ -34,6 +34,11 @@ abstract class Importer
 
     abstract public function getImportUrl(): string;
 
+    public function getUploadUrl(): string
+    {
+        return route('data-synchronize.upload');
+    }
+
     abstract public function handle(array $data): int;
 
     public function getLabel(): string
