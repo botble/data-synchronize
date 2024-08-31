@@ -8,7 +8,7 @@
 
 <x-core::form
     method="post"
-    :url="route('data-synchronize.upload')"
+    :url="$importer->getUploadUrl()"
     :data-validate-url="$importer->getValidateUrl()"
     :data-import-url="$importer->getImportUrl()"
     data-bb-toggle="import-form"
