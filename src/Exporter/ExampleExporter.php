@@ -18,7 +18,7 @@ class ExampleExporter extends Exporter
 
     public function getExportFileName(): string
     {
-        return sprintf('%s-example', str($this->label)->trim()->replace(' ', '-'));
+        return sprintf('%s-example.%s', str($this->label)->trim()->replace(' ', '-'), $this->format);
     }
 
     public function collection(): Collection
