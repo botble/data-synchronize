@@ -8,6 +8,7 @@ use Botble\DataSynchronize\Concerns\Exporter\HasEmptyState;
 use Botble\DataSynchronize\Enums\ExportColumnType;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -88,7 +89,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     public function map($row): array
     {
         return array_map(function (ExportColumn $column) use ($row) {
-            $value = is_array($row) ? $row[$column->getName()] : $row->{$column->getName()};
+            $value = Arr::get((array) $row, $column->getName());
 
             return match ($column->getType()) {
                 ExportColumnType::BOOLEAN => $value ? $column->getTrueValue() : $column->getFalseValue(),
