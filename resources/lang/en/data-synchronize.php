@@ -65,4 +65,5 @@ return [
             'back' => 'Back to :page',
         ],
     ],
+    'check_all' => 'Check all',
 ];

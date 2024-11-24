@@ -50,7 +50,7 @@
                         @else
                             <x-core::form.label>
                                 {{ trans('packages/data-synchronize::data-synchronize.export.form.columns') }}
-                                <a href="javascript:void(0)" class="ms-2 text-primary" data-bb-toggle="check-all" data-bb-target=".export-column">Check all</a>
+                                <a href="javascript:void(0)" class="ms-2 text-primary" data-bb-toggle="check-all" data-bb-target=".export-column">{{ trans('packages/data-synchronize::data-synchronize.check_all') }}</a>
                             </x-core::form.label>
 
                             <div @class(['row row-cols-1', 'row-cols-sm-2 row-cols-lg-3' => count($exporter->getColumns()) > 6])>
