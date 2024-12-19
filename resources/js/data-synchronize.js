@@ -29,8 +29,7 @@ $(() => {
                 Botble.showSuccess($form.data('success-message'))
             })
             .catch((error) => {
-                console.log(error)
-                Botble.showError($form.data('error-message'))
+                Botble.showError(error.message ? (error.statusText + ': ' + error.message) : form.data('error-message'))
             })
     }
 
