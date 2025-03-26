@@ -52,7 +52,7 @@
                         @else
                             <x-core::form.label>
                                 {{ trans('packages/data-synchronize::data-synchronize.export.form.columns') }}
-                                <a href="javascript:void(0)" class="ms-2 text-primary" data-bb-toggle="check-all" data-bb-target=".export-column">{{ trans('packages/data-synchronize::data-synchronize.check_all') }}</a>
+                                <a href="javascript:void(0)" class="ms-2 text-primary check-all-columns">{{ trans('packages/data-synchronize::data-synchronize.check_all') }}</a>
                             </x-core::form.label>
 
                             <div @class(['row row-cols-1', 'row-cols-sm-2 row-cols-lg-3' => count($exporter->getColumns()) > 6])>
@@ -97,4 +97,87 @@
                 @endif
         </x-core::card>
     </x-core::form>
+
+    @push('footer')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.querySelector('.data-synchronize-export-form');
+                const storageKey = 'data-synchronize-export-form-' + window.location.pathname;
+                const columnCheckboxes = form.querySelectorAll('.export-column');
+                const checkAllButton = form.querySelector('.check-all-columns');
+
+                // Function to save form values to localStorage
+                function saveFormValues() {
+                    const formData = new FormData(form);
+                    const values = {};
+                    
+                    // Save all form fields
+                    for (const [key, value] of formData.entries()) {
+                        if (key === 'columns[]') {
+                            if (!values.columns) {
+                                values.columns = [];
+                            }
+                            values.columns.push(value);
+                        } else {
+                            values[key] = value;
+                        }
+                    }
+
+                    localStorage.setItem(storageKey, JSON.stringify(values));
+                }
+
+                // Function to restore form values from localStorage
+                function restoreFormValues() {
+                    const savedValues = localStorage.getItem(storageKey);
+                    if (!savedValues) return;
+
+                    const values = JSON.parse(savedValues);
+
+                    // Restore all form fields
+                    Object.entries(values).forEach(([key, value]) => {
+                        if (key === 'columns') {
+                            // Handle checkboxes
+                            columnCheckboxes.forEach(checkbox => {
+                                checkbox.checked = value.includes(checkbox.value);
+                            });
+                        } else {
+                            // Handle other form fields
+                            const input = form.querySelector(`[name="${key}"]`);
+                            if (input) {
+                                if (input.type === 'radio') {
+                                    const radio = form.querySelector(`input[name="${key}"][value="${value}"]`);
+                                    if (radio) {
+                                        radio.checked = true;
+                                    }
+                                } else {
+                                    input.value = value;
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Handle check all functionality
+                checkAllButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const allChecked = Array.from(columnCheckboxes).every(checkbox => checkbox.checked);
+                    
+                    columnCheckboxes.forEach(checkbox => {
+                        if (!checkbox.disabled) {
+                            checkbox.checked = !allChecked;
+                        }
+                    });
+
+                    saveFormValues();
+                });
+
+                // Save form values when any input changes
+                form.addEventListener('change', saveFormValues);
+                form.addEventListener('input', saveFormValues);
+
+                // Restore form values when page loads
+                restoreFormValues();
+            });
+        </script>
+    @endpush
 @stop
