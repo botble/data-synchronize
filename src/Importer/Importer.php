@@ -140,16 +140,18 @@ abstract class Importer
             ->addScripts('dropzone')
             ->addStyles('dropzone');
 
+        return view($this->getView(), ['importer' => $this]);
+    }
+
+    protected function getView(): string
+    {
         $view = 'packages/data-synchronize::import';
 
         if ($this->renderWithoutLayout) {
             $view = 'packages/data-synchronize::partials.importer';
         }
 
-        return view(
-            apply_filters('data_synchronize_importer_view', $view),
-            ['importer' => $this]
-        );
+        return apply_filters('data_synchronize_importer_view', $view);
     }
 
     public function headerToSnakeCase(): bool

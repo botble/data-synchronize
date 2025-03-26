@@ -39,6 +39,8 @@
                         </div>
                     @endif
 
+                    @yield('export_extra_filters_before')
+
                     <div>
                         @if($exporter->allColumnsIsDisabled())
                             <x-core::form.label>
@@ -80,6 +82,8 @@
                         value="csv"
                     >
                     </x-core::form.radio-list>
+
+                    @yield('export_extra_filters_after')
                 @else
                     {!! $exporter->getEmptyStateContent() !!}
                 @endif

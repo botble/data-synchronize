@@ -53,6 +53,8 @@
 
             {!! apply_filters('data_synchronize_import_form_before', null, $importer) !!}
 
+            @yield('import_extra_form_before')
+
             <div class="mb-3">
                 <div class="dropzone">
                     <div class="dz-message">
@@ -74,6 +76,8 @@
             </div>
 
             {!! apply_filters('data_synchronize_import_form_after', null, $importer) !!}
+
+            @yield('import_extra_form_after')
 
             <pre class="mt-3 data-synchronize-import-output" style="display: none"></pre>
         </x-core::card.body>

@@ -188,9 +188,16 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     {
         Assets::addScriptsDirectly('vendor/core/packages/data-synchronize/js/data-synchronize.js');
 
-        return view('packages/data-synchronize::export', [
+        return view($this->getView(), [
             'exporter' => $this,
         ]);
+    }
+
+    protected function getView(): string
+    {
+        $view = 'packages/data-synchronize::export';
+
+        return apply_filters('data_synchronize_exporter_view', $view);
     }
 
     public function export(): BinaryFileResponse
