@@ -110,9 +110,14 @@
                 function saveFormValues() {
                     const formData = new FormData(form);
                     const values = {};
-                    
-                    // Save all form fields
+
+                    // Save all form fields except _token
                     for (const [key, value] of formData.entries()) {
+                        // Skip the CSRF token field
+                        if (key === '_token') {
+                            continue;
+                        }
+
                         if (key === 'columns[]') {
                             if (!values.columns) {
                                 values.columns = [];
@@ -133,8 +138,13 @@
 
                     const values = JSON.parse(savedValues);
 
-                    // Restore all form fields
+                    // Restore all form fields except _token
                     Object.entries(values).forEach(([key, value]) => {
+                        // Skip the CSRF token field
+                        if (key === '_token') {
+                            return;
+                        }
+
                         if (key === 'columns') {
                             // Handle checkboxes
                             columnCheckboxes.forEach(checkbox => {
@@ -161,7 +171,7 @@
                 checkAllButton.addEventListener('click', function(e) {
                     e.preventDefault();
                     const allChecked = Array.from(columnCheckboxes).every(checkbox => checkbox.checked);
-                    
+
                     columnCheckboxes.forEach(checkbox => {
                         if (!checkbox.disabled) {
                             checkbox.checked = !allChecked;
