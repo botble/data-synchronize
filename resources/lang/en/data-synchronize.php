@@ -48,6 +48,7 @@ return [
     'export' => [
         'name' => 'Export',
         'heading' => 'Export :label',
+        'excel_not_supported_for_large_exports' => 'Excel format is not supported for large exports (:count items). Please use CSV format instead for better performance and reliability.',
 
         'form' => [
             'all_columns_disabled' => 'Following columns will be exported: :columns.',

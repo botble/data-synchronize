@@ -102,18 +102,15 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const form = document.querySelector('.data-synchronize-export-form');
-                const storageKey = 'data-synchronize-export-form-' + window.location.pathname;
+                const storageKey = 'data-synchronize-export-form-v-1' + window.location.pathname;
                 const columnCheckboxes = form.querySelectorAll('.export-column');
                 const checkAllButton = form.querySelector('.check-all-columns');
 
-                // Function to save form values to localStorage
                 function saveFormValues() {
                     const formData = new FormData(form);
                     const values = {};
 
-                    // Save all form fields except _token
                     for (const [key, value] of formData.entries()) {
-                        // Skip the CSRF token field
                         if (key === '_token') {
                             continue;
                         }
@@ -131,27 +128,22 @@
                     localStorage.setItem(storageKey, JSON.stringify(values));
                 }
 
-                // Function to restore form values from localStorage
                 function restoreFormValues() {
                     const savedValues = localStorage.getItem(storageKey);
                     if (!savedValues) return;
 
                     const values = JSON.parse(savedValues);
 
-                    // Restore all form fields except _token
                     Object.entries(values).forEach(([key, value]) => {
-                        // Skip the CSRF token field
                         if (key === '_token') {
                             return;
                         }
 
                         if (key === 'columns') {
-                            // Handle checkboxes
                             columnCheckboxes.forEach(checkbox => {
                                 checkbox.checked = value.includes(checkbox.value);
                             });
                         } else {
-                            // Handle other form fields
                             const input = form.querySelector(`[name="${key}"]`);
                             if (input) {
                                 if (input.type === 'radio') {
@@ -167,7 +159,6 @@
                     });
                 }
 
-                // Handle check all functionality
                 checkAllButton.addEventListener('click', function(e) {
                     e.preventDefault();
                     const allChecked = Array.from(columnCheckboxes).every(checkbox => checkbox.checked);
@@ -181,11 +172,9 @@
                     saveFormValues();
                 });
 
-                // Save form values when any input changes
                 form.addEventListener('change', saveFormValues);
                 form.addEventListener('input', saveFormValues);
 
-                // Restore form values when page loads
                 restoreFormValues();
             });
         </script>

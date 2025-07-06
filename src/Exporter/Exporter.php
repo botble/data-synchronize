@@ -35,6 +35,10 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     protected string $url;
 
+    protected bool $optimizeMemory = true;
+
+    protected int $memoryCheckInterval = 1000;
+
     /**
      * @return \Botble\DataSynchronize\Exporter\ExportColumn[]
      */
@@ -204,6 +208,10 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     {
         BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
+        if ($this->optimizeMemory) {
+            $this->configureMemoryOptimization();
+        }
+
         $writeType = match ($this->format) {
             'csv' => Excel::CSV,
             'xlsx' => Excel::XLSX,
@@ -270,5 +278,34 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     public function allColumnsIsDisabled(): bool
     {
         return count($this->getAcceptedColumns()) === count(array_filter($this->getAcceptedColumns(), fn (ExportColumn $column) => $column->isDisabled()));
+    }
+
+    protected function configureMemoryOptimization(): void
+    {
+        if ($memoryLimit = config('packages.data-synchronize.export.memory_limit')) {
+            ini_set('memory_limit', $memoryLimit);
+        }
+
+        if ($timeLimit = config('packages.data-synchronize.export.time_limit')) {
+            set_time_limit($timeLimit);
+        }
+
+        if (class_exists('DB')) {
+            \DB::disableQueryLog();
+        }
+    }
+
+    public function setOptimizeMemory(bool $optimize): self
+    {
+        $this->optimizeMemory = $optimize;
+
+        return $this;
+    }
+
+    public function setMemoryCheckInterval(int $interval): self
+    {
+        $this->memoryCheckInterval = $interval;
+
+        return $this;
     }
 }
