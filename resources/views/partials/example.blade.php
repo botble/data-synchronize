@@ -29,7 +29,7 @@
                     <x-core::table.body.row>
                         @foreach ($importer->getColumns() as $column)
                             <x-core::table.body.cell>
-                                {{ Arr::get($example, $column->getName()) }}
+                                {{ Str::limit(Arr::get($example, $column->getName()), 100) }}
                             </x-core::table.body.cell>
                         @endforeach
                     </x-core::table.body.row>
