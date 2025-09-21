@@ -4,55 +4,67 @@ return [
     'tools' => [
         'export_import_data' => 'تصدير/استيراد البيانات',
     ],
+
     'import' => [
-        'name' => 'يستورد',
-        'heading' => 'Import :label',
+        'name' => 'استيراد',
+        'heading' => 'استيراد :label',
         'failed_to_read_file' => 'الملف غير صالح أو تالف أو كبير جدًا بحيث لا يمكن قراءته.',
+
         'form' => [
-            'quick_export_message' => 'If you want to export :label data, you can do it quickly by clicking on :export_csv_link or :export_excel_link.',
-            'quick_export_button' => 'Export to :format',
+            'quick_export_message' => 'إذا كنت تريد تصدير بيانات :label، يمكنك القيام بذلك بسرعة بالنقر فوق :export_csv_link أو :export_excel_link.',
+            'quick_export_button' => 'تصدير إلى :format',
             'dropzone_message' => 'قم بسحب وإسقاط الملف هنا أو انقر للتحميل',
-            'allowed_extensions' => 'Choose a file with following extensions: :extensions.',
-            'import_button' => 'يستورد',
-            'chunk_size' => 'حجم قطعة',
+            'allowed_extensions' => 'اختر ملفًا بالامتدادات التالية: :extensions.',
+            'import_button' => 'استيراد',
+            'chunk_size' => 'حجم القطعة',
             'chunk_size_helper' => 'يتم تحديد عدد الصفوف التي سيتم استيرادها في المرة الواحدة حسب حجم القطعة. قم بزيادة هذه القيمة إذا كان لديك ملف كبير ويتم استيراد البيانات بسرعة كبيرة. قم بتقليل هذه القيمة إذا واجهت حدودًا للذاكرة أو مشكلات في مهلة البوابة عند استيراد البيانات.',
         ],
+
         'failures' => [
             'title' => 'الفشل',
-            'attribute' => 'يصف',
+            'attribute' => 'السمة',
             'errors' => 'أخطاء',
         ],
+
         'example' => [
             'title' => 'مثال',
-            'download' => 'Download example :type file',
+            'download' => 'تحميل ملف :type النموذجي',
         ],
+
         'rules' => [
-            'title' => 'قواعد',
+            'title' => 'القواعد',
             'column' => 'عمود',
         ],
+
         'uploading_message' => 'بدء تحميل الملف...',
-        'uploaded_message' => 'File :file has been uploaded successfully. Start validating data...',
-        'validating_message' => 'Validating from :from to :to...',
-        'importing_message' => 'Importing from :from to :to...',
-        'done_message' => 'Imported :count :label successfully.',
+        'uploaded_message' => 'تم تحميل الملف :file بنجاح. بدء التحقق من البيانات...',
+        'validating_message' => 'التحقق من :from إلى :to...',
+        'importing_message' => 'الاستيراد من :from إلى :to...',
+        'done_message' => 'تم استيراد :count :label بنجاح.',
         'validating_failed_message' => 'فشل التحقق من الصحة. يرجى التحقق من الأخطاء أدناه.',
         'no_data_message' => 'بياناتك محدثة بالفعل أو لا توجد بيانات لاستيرادها.',
     ],
+
     'export' => [
-        'name' => 'يصدّر',
-        'heading' => 'Export :label',
+        'name' => 'تصدير',
+        'heading' => 'تصدير :label',
+        'excel_not_supported_for_large_exports' => 'تنسيق Excel غير مدعوم للصادرات الكبيرة (:count عنصر). يرجى استخدام تنسيق CSV للحصول على أداء وموثوقية أفضل.',
+
         'form' => [
-            'all_columns_disabled' => 'Following columns will be exported: :columns.',
+            'all_columns_disabled' => 'سيتم تصدير الأعمدة التالية: :columns.',
             'columns' => 'أعمدة',
-            'format' => 'شكل',
-            'export_button' => 'يصدّر',
+            'format' => 'التنسيق',
+            'export_button' => 'تصدير',
         ],
+
         'success_message' => 'تم التصدير بنجاح.',
         'error_message' => 'فشل التصدير.',
+
         'empty_state' => [
             'title' => 'لا توجد بيانات للتصدير',
             'description' => 'يبدو أنه لا توجد بيانات للتصدير.',
-            'back' => 'Back to :page',
+            'back' => 'العودة إلى :page',
         ],
     ],
+    'check_all' => 'تحديد الكل',
 ];

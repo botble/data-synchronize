@@ -41,6 +41,8 @@ return [
     'export' => [
         'name' => '导出',
         'heading' => '导出 :label',
+        'excel_not_supported_for_large_exports' => 'Excel格式不支持大量导出（:count 项）。请使用CSV格式以获得更好的性能和可靠性。',
+
         'form' => [
             'all_columns_disabled' => '将导出的列为：:columns。',
             'columns' => '列',

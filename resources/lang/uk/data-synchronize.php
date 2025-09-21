@@ -4,55 +4,67 @@ return [
     'tools' => [
         'export_import_data' => 'Експорт/імпорт даних',
     ],
+
     'import' => [
         'name' => 'Імпорт',
-        'heading' => 'Import :label',
+        'heading' => 'Імпорт :label',
         'failed_to_read_file' => 'Файл недійсний, пошкоджений або завеликий для читання.',
+
         'form' => [
-            'quick_export_message' => 'If you want to export :label data, you can do it quickly by clicking on :export_csv_link or :export_excel_link.',
-            'quick_export_button' => 'Export to :format',
+            'quick_export_message' => 'Якщо ви хочете експортувати дані :label, ви можете швидко зробити це, натиснувши на :export_csv_link або :export_excel_link.',
+            'quick_export_button' => 'Експортувати в :format',
             'dropzone_message' => 'Перетягніть файл сюди або натисніть, щоб завантажити',
-            'allowed_extensions' => 'Choose a file with following extensions: :extensions.',
+            'allowed_extensions' => 'Виберіть файл з наступними розширеннями: :extensions.',
             'import_button' => 'Імпорт',
-            'chunk_size' => 'Розмір шматка',
-            'chunk_size_helper' => 'Кількість рядків, які потрібно імпортувати одночасно, визначається розміром блоку. Збільште це значення, якщо у вас великий файл і дані імпортуються дуже швидко. Зменшіть це значення, якщо під час імпортування даних виникнуть обмеження пам’яті або проблеми з тайм-аутом шлюзу.',
+            'chunk_size' => 'Розмір блоку',
+            'chunk_size_helper' => 'Кількість рядків, які потрібно імпортувати одночасно, визначається розміром блоку. Збільште це значення, якщо у вас великий файл і дані імпортуються дуже швидко. Зменшіть це значення, якщо під час імпортування даних виникнуть обмеження пам'яті або проблеми з тайм-аутом шлюзу.',
         ],
+
         'failures' => [
             'title' => 'Невдачі',
             'attribute' => 'Атрибут',
             'errors' => 'Помилки',
         ],
+
         'example' => [
-            'title' => 'приклад',
-            'download' => 'Download example :type file',
+            'title' => 'Приклад',
+            'download' => 'Завантажити приклад :type файлу',
         ],
+
         'rules' => [
-            'title' => 'правила',
+            'title' => 'Правила',
             'column' => 'Колонка',
         ],
+
         'uploading_message' => 'Початок завантаження файлу...',
-        'uploaded_message' => 'File :file has been uploaded successfully. Start validating data...',
-        'validating_message' => 'Validating from :from to :to...',
-        'importing_message' => 'Importing from :from to :to...',
-        'done_message' => 'Imported :count :label successfully.',
+        'uploaded_message' => 'Файл :file успішно завантажено. Початок перевірки даних...',
+        'validating_message' => 'Перевірка від :from до :to...',
+        'importing_message' => 'Імпорт від :from до :to...',
+        'done_message' => 'Успішно імпортовано :count :label.',
         'validating_failed_message' => 'Помилка перевірки. Будь ласка, перевірте помилки нижче.',
         'no_data_message' => 'Ваші дані вже оновлені або немає даних для імпорту.',
     ],
+
     'export' => [
         'name' => 'Експорт',
-        'heading' => 'Export :label',
+        'heading' => 'Експорт :label',
+        'excel_not_supported_for_large_exports' => 'Формат Excel не підтримується для великих експортів (:count елементів). Будь ласка, використовуйте формат CSV для кращої продуктивності та надійності.',
+
         'form' => [
-            'all_columns_disabled' => 'Following columns will be exported: :columns.',
-            'columns' => 'Стовпці',
+            'all_columns_disabled' => 'Наступні колонки будуть експортовані: :columns.',
+            'columns' => 'Колонки',
             'format' => 'Формат',
             'export_button' => 'Експорт',
         ],
+
         'success_message' => 'Успішно експортовано.',
         'error_message' => 'Помилка експорту.',
+
         'empty_state' => [
             'title' => 'Немає даних для експорту',
             'description' => 'Схоже, немає даних для експорту.',
-            'back' => 'Back to :page',
+            'back' => 'Назад до :page',
         ],
     ],
+    'check_all' => 'Вибрати все',
 ];
