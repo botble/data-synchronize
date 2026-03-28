@@ -7,6 +7,15 @@
             "Botble\\DataSynchronize\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Botble\\DataSynchronize\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0 || ^10.0",
+        "phpunit/phpunit": "^11.0"
+    },
     "require": {
         "botble/platform": "*@dev",
         "maatwebsite/excel": "^3.1",
