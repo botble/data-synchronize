@@ -9,8 +9,16 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'data-synchronize:test-large-export', description: 'Test large product export functionality')]
 class TestLargeExportCommand extends Command
 {
-    public function handle(): void
+    public function handle(): int
     {
+        // The ecommerce plugin registers its namespace at runtime, so this has to be
+        // checked here rather than when the command is registered.
+        if (! class_exists(ProductExporter::class)) {
+            $this->components->error('This command requires the ecommerce plugin to be installed and activated.');
+
+            return self::FAILURE;
+        }
+
         $this->info('Testing Large Product Export...');
 
         try {
@@ -79,9 +87,12 @@ class TestLargeExportCommand extends Command
 
             $this->info("\nStreaming export is properly configured and ready to handle large datasets!");
 
+            return self::SUCCESS;
         } catch (\Exception $e) {
             $this->error('Error: ' . $e->getMessage());
             $this->error('Stack trace: ' . $e->getTraceAsString());
+
+            return self::FAILURE;
         }
     }
 }

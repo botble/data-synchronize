@@ -22,7 +22,7 @@ use Symfony\Component\Finder\Finder;
 #[AsCommand(name: 'data-synchronize:export', description: 'Export data from database to Excel/Csv file')]
 class ExportCommand extends Command implements PromptsForMissingInput
 {
-    public function handle(): void
+    public function handle(): int
     {
         $exporter = $this->argument('exporter') ?: search(
             label: 'Which exporter do you want to use?',
@@ -41,19 +41,29 @@ class ExportCommand extends Command implements PromptsForMissingInput
             default: 'csv',
         );
 
+        // Only these two reach a writer; anything else used to surface as an
+        // UnhandledMatchError from deep inside the exporter.
+        if (! in_array($format, ['csv', 'xlsx'], true)) {
+            $this->components->error(sprintf('Unsupported format [%s]. Use csv or xlsx.', $format));
+
+            return self::FAILURE;
+        }
+
         if (! class_exists($exporter)) {
             $this->components->error('Exporter class does not exist');
 
-            exit(self::FAILURE);
+            return self::FAILURE;
+        }
+
+        // Check the type before instantiating - constructing an arbitrary class first
+        // turns a wrong class name into a fatal instead of the message below.
+        if (! is_subclass_of($exporter, Exporter::class)) {
+            $this->components->error('Exporter class must be an instance of ' . Exporter::class);
+
+            return self::FAILURE;
         }
 
         $exporter = new $exporter();
-
-        if (! $exporter instanceof Exporter) {
-            $this->components->error('Exporter class must be an instance of ' . Exporter::class);
-
-            exit(self::FAILURE);
-        }
 
         $exporter->format($format);
 
@@ -83,20 +93,20 @@ class ExportCommand extends Command implements PromptsForMissingInput
         } catch (Exception $e) {
             $this->components->error($e->getMessage());
 
-            exit(self::FAILURE);
+            return self::FAILURE;
         }
 
         $this->components->info(
             "{$exporter->getLabel()} has been exported to <comment>{$path}/{$exporter->getExportFileName()}</comment>"
         );
 
-        exit(self::SUCCESS);
+        return self::SUCCESS;
     }
 
     protected function getOptions(): array
     {
         return [
-            ['format', null, InputOption::VALUE_OPTIONAL, 'The format of the file (csv, xls, xlsx)'],
+            ['format', null, InputOption::VALUE_OPTIONAL, 'The format of the file (csv, xlsx)'],
             ['chunk-size', null, InputOption::VALUE_OPTIONAL, 'Number of records to process per chunk'],
             ['optimize-memory', null, InputOption::VALUE_NONE, 'Enable memory optimization for large exports'],
         ];
