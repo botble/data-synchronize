@@ -156,8 +156,7 @@ class ImporterTest extends TestCase
      */
     protected function createImporter(array $columns): Importer
     {
-        return new class ($columns) extends Importer
-        {
+        return new class ($columns) extends Importer {
             public function __construct(protected array $importColumns)
             {
             }
@@ -198,8 +197,7 @@ class ImporterTest extends TestCase
 
     protected function createImporterWithMapping(array $columns, callable $mapFn): Importer
     {
-        return new class ($columns, $mapFn) extends Importer implements WithMapping
-        {
+        return new class ($columns, $mapFn) extends Importer implements WithMapping {
             public function __construct(
                 protected array $importColumns,
                 protected $mapFn,

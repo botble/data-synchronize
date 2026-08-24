@@ -123,4 +123,17 @@ class ImportColumnTest extends TestCase
         $this->assertSame(['required', 'email'], $column->getRules());
         $this->assertTrue($column->isNullable());
     }
+
+    public function test_rules_description_is_null_by_default(): void
+    {
+        $this->assertNull(ImportColumn::make('name')->getRulesDescription());
+        $this->assertNull(ImportColumn::make('name')->rules(['required'])->getRulesDescription());
+    }
+
+    public function test_rules_description_is_returned_when_provided(): void
+    {
+        $column = ImportColumn::make('name')->rules(['required', 'max:250'], 'Name is required, max 250 chars.');
+
+        $this->assertSame('Name is required, max 250 chars.', $column->getRulesDescription());
+    }
 }
