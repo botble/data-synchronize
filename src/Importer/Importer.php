@@ -178,10 +178,11 @@ abstract class Importer
         if ($count === 0) {
             $newFileName = pathinfo($fileName, PATHINFO_FILENAME) . '-' . uniqid() . '.' . pathinfo($fileName, PATHINFO_EXTENSION);
 
-            $storageFolder = config('packages.data-synchronize.data-synchronize.storage.path');
-
-            if ($this->filesystem()->exists("$storageFolder/{$fileName}")) {
-                $this->filesystem()->move("$storageFolder/{$fileName}", "$storageFolder/{$newFileName}");
+            if ($this->filesystem()->exists($this->resolveFilePath($fileName))) {
+                $this->filesystem()->move(
+                    $this->resolveFilePath($fileName),
+                    $this->resolveFilePath($newFileName)
+                );
             }
         }
 
@@ -210,10 +211,8 @@ abstract class Importer
         $imported = $this->handle($rows);
 
         if ($count === 0) {
-            $storageFolder = config('packages.data-synchronize.data-synchronize.storage.path');
-
-            if ($this->filesystem()->exists("$storageFolder/$fileName")) {
-                $this->filesystem()->delete("$storageFolder/$fileName");
+            if ($this->filesystem()->exists($this->resolveFilePath($fileName))) {
+                $this->filesystem()->delete($this->resolveFilePath($fileName));
             }
         }
 
@@ -248,7 +247,7 @@ abstract class Importer
 
     public function getRows(string $fileName, int $offset = 0, int $limit = 0): LazyCollection
     {
-        $filePath = sprintf('%s/%s', config('packages.data-synchronize.data-synchronize.storage.path'), $fileName);
+        $filePath = $this->resolveFilePath($fileName);
 
         if (! $this->filesystem()->exists($filePath)) {
             throw new FileNotFoundException('File not found at path: ' . $filePath);
@@ -307,6 +306,25 @@ abstract class Importer
     public function filesystem(): Filesystem
     {
         return Storage::disk(config('packages.data-synchronize.data-synchronize.storage.disk'));
+    }
+
+    /**
+     * Resolve an uploaded file name to a path inside the import folder.
+     *
+     * Callers pass this straight through from the request, so strip any directory
+     * part instead of trusting it - the file always lives in the import folder.
+     */
+    protected function resolveFilePath(string $fileName): string
+    {
+        // basename() only treats "\\" as a separator on Windows, so normalise first -
+        // otherwise a Windows-style name survives intact on a Linux host.
+        $fileName = basename(str_replace('\\', '/', $fileName));
+
+        return sprintf(
+            '%s/%s',
+            config('packages.data-synchronize.data-synchronize.storage.path'),
+            $fileName
+        );
     }
 
     public function downloadExample(string $format): BinaryFileResponse

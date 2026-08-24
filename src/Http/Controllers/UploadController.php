@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class UploadController extends BaseController
 {
@@ -44,7 +45,13 @@ class UploadController extends BaseController
     protected function saveFile(UploadedFile $fileUpload): BaseHttpResponse
     {
         $validator = Validator::make(['file' => $fileUpload], [
-            'file' => ['required', 'mimetypes:' . implode(',', config('packages.data-synchronize.data-synchronize.mime_types'))],
+            'file' => [
+                'required',
+                'mimetypes:' . implode(',', config('packages.data-synchronize.data-synchronize.mime_types')),
+                // The allowed mime types include text/plain, which any source file
+                // sniffs as - so pin the extension as well, not just the mime type.
+                'extensions:' . implode(',', config('packages.data-synchronize.data-synchronize.extensions')),
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -77,10 +84,16 @@ class UploadController extends BaseController
 
     protected function createFilename(UploadedFile $file): string
     {
-        $extension = $file->getClientOriginalExtension();
-        $filename = str_replace(".$extension", '', $file->getClientOriginalName());
-        $filename .= sprintf('-%s.%s', md5(uniqid()), $extension);
+        // getClientOriginalName() is attacker-controlled and is about to be used as a
+        // path segment, so keep only the basename and strip anything that is not safe
+        // in a file name before appending our own unique suffix.
+        $extension = Str::lower($file->getClientOriginalExtension());
+        $original = pathinfo(basename($file->getClientOriginalName()), PATHINFO_FILENAME);
+        $name = preg_replace('/[^\w.-]+/u', '-', $original);
+        // Collapse runs of dots: a name containing ".." is refused by ImportRequest,
+        // which would leave the uploaded file impossible to import.
+        $name = Str::limit(preg_replace('/\.{2,}/', '.', $name), 100, '');
 
-        return $filename;
+        return sprintf('%s-%s.%s', trim($name, '-.') ?: 'import', md5(uniqid()), $extension);
     }
 }
