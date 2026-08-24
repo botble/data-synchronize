@@ -20,8 +20,18 @@ use Symfony\Component\Finder\Finder;
 #[AsCommand(name: 'data-synchronize:import', description: 'Import data from Excel/CSV file')]
 class ImportCommand extends Command implements PromptsForMissingInput
 {
-    public function handle(): void
+    /**
+     * How many validation errors to print before summarising the rest.
+     */
+    protected const MAX_REPORTED_ERRORS = 20;
+
+    public function handle(): int
     {
+        // A large import legitimately runs for hours. The CLI SAPI does not always mean
+        // "no time limit" - LiteSpeed's lsphp binary enforces php.ini's max_execution_time
+        // even on the command line - so lift it explicitly instead of dying mid-file.
+        @set_time_limit(0);
+
         $importer = $this->argument('importer') ?: search(
             label: 'Which importer do you want to use?',
             options: fn (string $value) => array_filter(
@@ -37,42 +47,62 @@ class ImportCommand extends Command implements PromptsForMissingInput
         if (! file_exists($path)) {
             $this->components->error('File does not exist');
 
-            exit(self::FAILURE);
+            return self::FAILURE;
         }
 
         if (! class_exists($importer)) {
             $this->components->error('Importer class does not exist');
 
-            exit(self::FAILURE);
+            return self::FAILURE;
+        }
+
+        // Check the type before instantiating - constructing an arbitrary class first
+        // turns a wrong class name into a fatal instead of the message below.
+        if (! is_subclass_of($importer, Importer::class)) {
+            $this->components->error('Importer class must be an instance of ' . Importer::class);
+
+            return self::FAILURE;
         }
 
         $importer = new $importer();
 
-        if (! $importer instanceof Importer) {
-            $this->components->error('Importer class must be an instance of ' . Importer::class);
-
-            exit(self::FAILURE);
-        }
-
-        $basename = basename($path);
+        // Give the working copy a unique name. Importing several files that share a
+        // basename (chunk_0001.csv from two different folders, for example) would
+        // otherwise collide here, and a leftover copy could be read instead of this file.
+        $basename = sprintf('%s-%s', uniqid(), basename($path));
         $storage = Storage::disk('local');
         $storagePath = config('packages.data-synchronize.data-synchronize.storage.path');
         $filePath = sprintf('%s/%s', $storagePath, $basename);
 
         $storage->put($filePath, file_get_contents($path));
 
-        $this->validateData($importer, $basename, $limit);
+        // Never import a copy we did not actually write - a failed or partial write
+        // must stop the run, not silently import whatever is sitting at that path.
+        if (! $storage->exists($filePath) || $storage->size($filePath) !== filesize($path)) {
+            $this->components->error(sprintf('Could not write a working copy of the file to [%s].', $storagePath));
+
+            $storage->delete($filePath);
+
+            return self::FAILURE;
+        }
+
+        if (! $this->validateData($importer, $basename, $limit)) {
+            $storage->delete($filePath);
+
+            return self::FAILURE;
+        }
 
         $this->importData($importer, $basename, $limit);
 
         $storage->delete($filePath);
 
-        exit(self::SUCCESS);
+        return self::SUCCESS;
     }
 
-    protected function validateData(Importer $importer, string $basename, int $limit = 100): void
+    protected function validateData(Importer $importer, string $basename, int $limit = 100): bool
     {
         $offset = 0;
+        $errors = [];
 
         $this->components->info('Validating data...');
 
@@ -80,10 +110,36 @@ class ImportCommand extends Command implements PromptsForMissingInput
             $response = $importer->validate($basename, $offset, $limit);
             $offset = $response->getNextOffset();
 
+            $errors = [...$errors, ...$response->errors];
+
             $this->components->info("Validated data from {$response->getFromOffset()} to {$response->getNextOffset()}");
         } while ($response->getNextOffset() < $response->total);
 
-        $this->components->info('Validated data successfully');
+        if (! $errors) {
+            $this->components->info('Validated data successfully');
+
+            return true;
+        }
+
+        $this->components->error(sprintf('Found %s validation error(s) in this file:', number_format(count($errors))));
+
+        foreach (array_slice($errors, 0, static::MAX_REPORTED_ERRORS) as $error) {
+            $this->components->warn(sprintf('  - %s', $error));
+        }
+
+        if (($remaining = count($errors) - static::MAX_REPORTED_ERRORS) > 0) {
+            $this->components->warn(sprintf('  ... and %s more.', number_format($remaining)));
+        }
+
+        if ($this->option('force')) {
+            $this->components->warn('Continuing anyway because --force was used. Invalid rows may fail to import.');
+
+            return true;
+        }
+
+        $this->components->error('Nothing was imported. Fix the file and run again, or pass --force to import it as-is.');
+
+        return false;
     }
 
     protected function importData(Importer $importer, string $basename, int $limit = 100): void
@@ -117,6 +173,7 @@ class ImportCommand extends Command implements PromptsForMissingInput
     {
         return [
             'limit' => ['limit', null, InputOption::VALUE_OPTIONAL, 'The limit of records to import'],
+            'force' => ['force', null, InputOption::VALUE_NONE, 'Import even if the file has validation errors'],
         ];
     }
 
