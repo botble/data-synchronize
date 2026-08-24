@@ -7,6 +7,7 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\DataSynchronize\Concerns\Exporter\HasEmptyState;
 use Botble\DataSynchronize\Enums\ExportColumnType;
 use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -24,6 +25,7 @@ use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFormatting, WithEvents, WithHeadings, WithMapping
 {
@@ -31,7 +33,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     protected ?array $acceptedColumns = [];
 
-    protected string $format = Excel::XLSX;
+    protected string $format = 'xlsx';
 
     protected string $url;
 
@@ -56,6 +58,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
             ->snake()
             ->replace('_', ' ')
             ->remove('exporter')
+            ->trim()
             ->title();
     }
 
@@ -97,15 +100,36 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
             return match ($column->getType()) {
                 ExportColumnType::BOOLEAN => $value ? $column->getTrueValue() : $column->getFalseValue(),
-                ExportColumnType::DATETIME => Date::dateTimeToExcel($value),
+                ExportColumnType::DATETIME => $this->formatDateTimeValue($value),
                 default => $value,
             };
         }, $this->getAcceptedColumns());
     }
 
+    /**
+     * Turn a date column's value into the serial number a spreadsheet expects.
+     */
+    protected function formatDateTimeValue(mixed $value): float|int|string
+    {
+        if (blank($value)) {
+            return '';
+        }
+
+        if (! $value instanceof DateTimeInterface) {
+            try {
+                $value = Carbon::parse($value);
+            } catch (Throwable) {
+                // Not a date at all - export it untouched rather than failing the file.
+                return (string) $value;
+            }
+        }
+
+        return Date::dateTimeToExcel($value);
+    }
+
     public function columnFormats(): array
     {
-        if ($this->format === Excel::CSV) {
+        if ($this->isCsv()) {
             return [];
         }
 
@@ -125,7 +149,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function registerEvents(): array
     {
-        if ($this->format === Excel::CSV) {
+        if ($this->isCsv()) {
             return [];
         }
 
@@ -254,9 +278,22 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     public function format(string $format): self
     {
-        $this->format = $format;
+        // Callers pass either 'xlsx'/'csv' from the request or the Excel::XLSX /
+        // Excel::CSV constants, which are 'Xlsx' and 'Csv' - normalise so the
+        // match() arms below and the file extension stay correct either way.
+        $this->format = Str::lower($format);
 
         return $this;
+    }
+
+    public function getFormat(): string
+    {
+        return $this->format;
+    }
+
+    public function isCsv(): bool
+    {
+        return $this->format === 'csv';
     }
 
     public function url(string $url): self
@@ -282,11 +319,11 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
 
     protected function configureMemoryOptimization(): void
     {
-        if ($memoryLimit = config('packages.data-synchronize.export.memory_limit')) {
+        if ($memoryLimit = config('packages.data-synchronize.data-synchronize.export.memory_limit')) {
             ini_set('memory_limit', $memoryLimit);
         }
 
-        if ($timeLimit = config('packages.data-synchronize.export.time_limit')) {
+        if ($timeLimit = config('packages.data-synchronize.data-synchronize.export.time_limit')) {
             set_time_limit($timeLimit);
         }
 
