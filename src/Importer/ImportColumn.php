@@ -120,4 +120,15 @@ class ImportColumn
     {
         return $this->falseValue;
     }
+
+    /**
+     * Accept the configured true label plus common spreadsheet spellings (1, true, yes, on),
+     * so files exported by older versions (1/0) or edited by hand re-import correctly.
+     */
+    public function isTruthy(string $value): bool
+    {
+        $value = strtolower(trim($value));
+
+        return $value === strtolower($this->trueValue) || in_array($value, ['1', 'true', 'yes', 'on'], true);
+    }
 }

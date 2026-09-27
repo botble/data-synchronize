@@ -279,7 +279,7 @@ abstract class Importer
 
                     $value = match (true) {
                         $column->isNullable() && empty($value) => null,
-                        $column->isBoolean() && is_string($value) => $value === $column->getTrueValue() ? 1 : 0,
+                        $column->isBoolean() && is_string($value) => $column->isTruthy($value) ? 1 : 0,
                         default => $value,
                     };
 

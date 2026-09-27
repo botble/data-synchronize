@@ -56,6 +56,24 @@ class ImporterTest extends TestCase
         $this->assertSame(0, $result[1]['active']);
     }
 
+    public function test_transform_rows_boolean_column_accepts_numeric_and_common_spellings(): void
+    {
+        $importer = $this->createImporter([
+            ImportColumn::make('active')->boolean('Yes', 'No'),
+        ]);
+
+        $result = $importer->transformRows([
+            ['active' => '1'],
+            ['active' => '0'],
+            ['active' => 'yes'],
+            ['active' => ' TRUE '],
+            ['active' => 'false'],
+            ['active' => ''],
+        ]);
+
+        $this->assertSame([1, 0, 1, 1, 0, 0], array_column($result, 'active'));
+    }
+
     public function test_transform_rows_with_mapping_applies_map(): void
     {
         $importer = $this->createImporterWithMapping(
