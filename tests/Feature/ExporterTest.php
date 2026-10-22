@@ -7,6 +7,9 @@ use Botble\DataSynchronize\Exporter\ExportCounter;
 use Botble\DataSynchronize\Exporter\Exporter;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\Facades\Excel as ExcelFacade;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Tests\TestCase;
 
@@ -151,6 +154,25 @@ class ExporterTest extends TestCase
         $this->assertNotSame([], $this->exporter()->format('xlsx')->registerEvents());
     }
 
+    public function test_xlsx_dropdown_validation_covers_every_data_row(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'exporter-validation-');
+
+        try {
+            file_put_contents($path, ExcelFacade::raw(new SampleExporterWithRows(), Excel::XLSX));
+            $sheet = IOFactory::createReader('Xlsx')->load($path)->getActiveSheet();
+        } finally {
+            @unlink($path);
+        }
+
+        // Column C is the boolean column; the heading row must stay free of the dropdown.
+        $this->assertSame(DataValidation::TYPE_NONE, $sheet->getCell('C1')->getDataValidation()->getType());
+
+        foreach (['C2', 'C3', 'C4'] as $cell) {
+            $this->assertSame(DataValidation::TYPE_LIST, $sheet->getCell($cell)->getDataValidation()->getType(), $cell);
+        }
+    }
+
     public function test_counters_are_empty_unless_the_exporter_defines_them(): void
     {
         $this->assertSame([], (new FullyDisabledExporter())->getCounters());
@@ -189,6 +211,18 @@ class SampleExporter extends Exporter
     public function collection(): Collection
     {
         return collect();
+    }
+}
+
+class SampleExporterWithRows extends SampleExporter
+{
+    public function collection(): Collection
+    {
+        return collect([
+            ['id' => 1, 'name' => 'First', 'is_featured' => true, 'created_at' => null],
+            ['id' => 2, 'name' => 'Second', 'is_featured' => false, 'created_at' => null],
+            ['id' => 3, 'name' => 'Third', 'is_featured' => true, 'created_at' => null],
+        ]);
     }
 }
 
