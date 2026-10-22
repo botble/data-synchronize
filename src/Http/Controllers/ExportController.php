@@ -170,7 +170,8 @@ abstract class ExportController extends BaseController
             // UTF-8 BOM so Excel opens the file with the right encoding.
             fwrite($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            fputcsv($handle, array_map(fn (ExportColumn $column) => $column->getLabel(), $columns));
+            // Explicit escape: PHP 8.4+ deprecates relying on the default value.
+            fputcsv($handle, array_map(fn (ExportColumn $column) => $column->getLabel(), $columns), escape: '\\');
 
             $written = 0;
 
@@ -180,7 +181,7 @@ abstract class ExportController extends BaseController
                 fputcsv($handle, array_map(
                     fn (ExportColumn $column) => $this->formatStreamedValue(Arr::get($row, $column->getName())),
                     $columns
-                ));
+                ), escape: '\\');
 
                 if (++$written % 1000 === 0) {
                     flush();

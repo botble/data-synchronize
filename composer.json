@@ -18,7 +18,7 @@
     },
     "require": {
         "botble/platform": "*@dev",
-        "maatwebsite/excel": "^3.1",
+        "maatwebsite/excel": "^3.1 || ^4.0",
         "spatie/simple-excel": "^3.6"
     },
     "extra": {

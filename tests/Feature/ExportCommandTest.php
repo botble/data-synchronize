@@ -33,6 +33,7 @@ class ExportCommandTest extends TestCase
         $this->artisan('data-synchronize:export', [
             'exporter' => 'App\\Nope\\NotAnExporter',
             'path' => $this->outputDir,
+            '--format' => 'csv',
         ])
             ->expectsOutputToContain('Exporter class does not exist')
             ->assertExitCode(1);
@@ -43,6 +44,7 @@ class ExportCommandTest extends TestCase
         $this->artisan('data-synchronize:export', [
             'exporter' => static::class,
             'path' => $this->outputDir,
+            '--format' => 'csv',
         ])
             ->expectsOutputToContain('must be an instance of')
             ->assertExitCode(1);
