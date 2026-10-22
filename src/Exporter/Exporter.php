@@ -181,8 +181,9 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
                         $validation->setFormula1(sprintf('"%s"', implode(',', $column->getOptions())));
 
                         // Assign one validation to the whole column range. Sharing a single
-                        // DataValidation across cells breaks on PhpSpreadsheet 2+: it writes
-                        // each cell's address onto the object, so only the last row kept it.
+                        // DataValidation across cells breaks on PhpSpreadsheet 4+ (validations are
+                        // stored per worksheet): each cell's address overwrote the shared object's
+                        // range, so only the last row kept it.
                         $lastRow = max(2, $event->sheet->getDelegate()->getHighestRow());
 
                         $event->sheet->getDelegate()->setDataValidation("{$coordinate}2:{$coordinate}{$lastRow}", $validation);
