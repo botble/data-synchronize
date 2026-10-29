@@ -4,6 +4,7 @@ namespace Botble\DataSynchronize\Exporter;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Supports\Helper;
 use Botble\DataSynchronize\Concerns\Exporter\HasEmptyState;
 use Botble\DataSynchronize\Enums\ExportColumnType;
 use Carbon\Carbon;
@@ -193,6 +194,20 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
         ];
     }
 
+    /**
+     * Raise memory_limit to at least $limit. A plain ini_set() would cut a server configured with
+     * more memory (or -1) down to the export default and make large exports run out of memory.
+     */
+    public static function raiseMemoryLimit(string $limit): void
+    {
+        $current = Helper::convertHrToBytes((string) ini_get('memory_limit'));
+        $target = Helper::convertHrToBytes($limit);
+
+        if ($current !== -1 && ($target === -1 || $target > $current)) {
+            @ini_set('memory_limit', $limit);
+        }
+    }
+
     public static function make(): static
     {
         return new static();
@@ -324,7 +339,7 @@ abstract class Exporter implements FromCollection, ShouldAutoSize, WithColumnFor
     protected function configureMemoryOptimization(): void
     {
         if ($memoryLimit = config('packages.data-synchronize.data-synchronize.export.memory_limit')) {
-            ini_set('memory_limit', $memoryLimit);
+            static::raiseMemoryLimit($memoryLimit);
         }
 
         if ($timeLimit = config('packages.data-synchronize.data-synchronize.export.time_limit')) {

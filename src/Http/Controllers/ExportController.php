@@ -161,7 +161,7 @@ abstract class ExportController extends BaseController
 
         return response()->streamDownload(function () use ($exporter, $columns): void {
             set_time_limit(0);
-            ini_set('memory_limit', config('packages.data-synchronize.data-synchronize.export.memory_limit', '512M'));
+            Exporter::raiseMemoryLimit((string) config('packages.data-synchronize.data-synchronize.export.memory_limit', '512M'));
 
             DB::disableQueryLog();
 
